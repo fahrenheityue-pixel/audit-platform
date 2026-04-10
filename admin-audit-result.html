@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>管理员 · 修改审核结果</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #e7eaf0;
+      --text: #1f2d3d;
+      --sub: #667085;
+      --blue: #2f54eb;
+      --green: #12b76a;
+      --orange: #f79009;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 96px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 24px;
+    }
+
+    .crumb {
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .crumb a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .crumb a:hover {
+      text-decoration: underline;
+    }
+
+    .crumb strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .wrap {
+      width: 96%;
+      max-width: 640px;
+      margin: 20px auto;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f3f7;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #344054;
+    }
+
+    .field-row .hint {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 400;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .radio-group label {
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0d5dd;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47, 84, 235, 0.12);
+    }
+
+    .meta-line {
+      font-size: 13px;
+      color: var(--sub);
+      line-height: 1.6;
+    }
+
+    .meta-line code {
+      background: #f2f4f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 -4px 12px rgba(16, 24, 40, 0.06);
+      z-index: 50;
+    }
+
+    .btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #d0d5dd;
+      background: #fff;
+      color: #344054;
+    }
+
+    .btn:hover {
+      background: #f9fafb;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .empty-tip {
+      padding: 24px;
+      text-align: center;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .empty-tip a {
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background: var(--card);
+      border-radius: 12px;
+      max-width: 420px;
+      width: 100%;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 48px rgba(16, 24, 40, 0.18);
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      border-bottom: 1px solid #f1f3f7;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      font-size: 14px;
+      color: #344054;
+      line-height: 1.6;
+    }
+
+    .modal-summary {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #eaecf0;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    .modal-foot {
+      padding: 12px 20px 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="crumb">
+      <a href="audit-list-prototype.html">审核列表</a>
+      <span> / </span>
+      <strong>管理员 · 修改审核结果</strong>
+    </div>
+  </div>
+
+  <div class="wrap" id="mainWrap"></div>
+
+  <div class="footer-bar" id="footerBar" style="display:none">
+    <button type="button" class="btn" id="btnCancel">取消</button>
+    <button type="button" class="btn btn-primary" id="btnSubmit">提交修改</button>
+  </div>
+
+  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog" id="modalDialogBox">
+      <div class="modal-head" id="modalTitle">确认提交</div>
+      <div class="modal-body">
+        <p style="margin:0">确定要保存以下审核结果吗？保存后将更新列表与该工单的展示信息。</p>
+        <div class="modal-summary" id="modalSummary"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn" id="modalCancel">返回修改</button>
+        <button type="button" class="btn btn-primary" id="modalConfirm">确认保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_SESSION_KEY = "auditListAdmin";
+    const AUDIT_PATCH_KEY = "auditResultPatches";
+
+    function isAuditListAdmin() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getAuditPatch(ticketId) {
+      try {
+        const m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+        return m[ticketId] || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getTicketContext(ticketId) {
+      try {
+        const raw = sessionStorage.getItem("ticketContext_" + ticketId);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getQueryTicketId() {
+      const p = new URLSearchParams(window.location.search);
+      return (p.get("ticketId") || "").trim();
+    }
+
+    function formatNowAuditTime() {
+      const n = new Date();
+      const p = x => String(x).padStart(2, "0");
+      return `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function resolveEditRow(ticketId) {
+      let row = null;
+      try {
+        const raw = sessionStorage.getItem("adminEditTicketRow");
+        if (raw) {
+          const r = JSON.parse(raw);
+          if (r && r.ticketId === ticketId) row = r;
+        }
+      } catch (e) {}
+      if (!row) {
+        const ctx = getTicketContext(ticketId);
+        if (ctx && ctx.ticketId === ticketId) row = ctx;
+      }
+      return row;
+    }
+
+    function canEditRow(row) {
+      return row && row.status === "已审核" && row.flow === "否";
+    }
+
+    let pendingForm = null;
+
+    function renderForm(row) {
+      const patch = getAuditPatch(row.ticketId);
+      const resultVal = patch && patch.result ? patch.result : row.result || "完结";
+      const remarkVal =
+        patch && patch.remark !== undefined ? patch.remark : row.remark || "";
+
+      document.getElementById("mainWrap").innerHTML = `
+        <div class="section">
+          <h2 class="section-title">工单信息</h2>
+          <div class="meta-line">工单ID：<code>${escapeHtml(row.ticketId)}</code></div>
+          <div class="meta-line" style="margin-top:8px">专辑：${escapeHtml(row.albumName || "")}（${escapeHtml(row.albumId || "")}）</div>
+          <div class="meta-line" style="margin-top:8px">渠道：${escapeHtml(row.channel || "")} · ${escapeHtml(row.method || "")}</div>
+          <p class="meta-line" style="margin-top:12px;color:#667085">仅当工单已审核且<strong>不再继续流转</strong>时允许管理员修改审核结果。</p>
+        </div>
+        <div class="section">
+          <h2 class="section-title">修改审核结果</h2>
+          <div class="field-row">
+            <label>审核结果 <span class="hint">（必选）</span></label>
+            <div class="radio-group">
+              <label><input type="radio" name="auditResult" value="完结" ${resultVal === "完结" ? "checked" : ""} /> 完结</label>
+              <label><input type="radio" name="auditResult" value="未完结" ${resultVal === "未完结" ? "checked" : ""} /> 未完结</label>
+            </div>
+          </div>
+          <div class="field-row">
+            <label for="auditRemark">审核备注 <span class="hint">（选填）</span></label>
+            <textarea id="auditRemark" placeholder="可补充说明"></textarea>
+          </div>
+        </div>
+      `;
+      const ta = document.getElementById("auditRemark");
+      if (ta) ta.value = remarkVal;
+      document.getElementById("footerBar").style.display = "flex";
+    }
+
+    function renderError(msg) {
+      document.getElementById("mainWrap").innerHTML = `<div class="section empty-tip">${msg}</div>`;
+      document.getElementById("footerBar").style.display = "none";
+    }
+
+    function getSelectedResult() {
+      const c = document.querySelector('input[name="auditResult"]:checked');
+      return c ? c.value : "";
+    }
+
+    const confirmModal = document.getElementById("confirmModal");
+    const modalSummary = document.getElementById("modalSummary");
+
+    function openConfirmModal(summaryText) {
+      modalSummary.textContent = summaryText;
+      confirmModal.classList.add("show");
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.remove("show");
+    }
+
+    function persistPatch(ticketId, result, remark) {
+      let m = {};
+      try {
+        m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+      } catch (e) {
+        m = {};
+      }
+      m[ticketId] = {
+        result,
+        remark,
+        time: formatNowAuditTime()
+      };
+      sessionStorage.setItem(AUDIT_PATCH_KEY, JSON.stringify(m));
+    }
+
+    document.getElementById("modalDialogBox").addEventListener("click", e => e.stopPropagation());
+    confirmModal.addEventListener("click", e => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+    document.getElementById("modalCancel").addEventListener("click", closeConfirmModal);
+    document.getElementById("modalConfirm").addEventListener("click", () => {
+      closeConfirmModal();
+      if (!pendingForm) return;
+      const { ticketId, result, remark } = pendingForm;
+      persistPatch(ticketId, result, remark);
+      pendingForm = null;
+      window.location.href = "audit-list-prototype.html?admin=1";
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && confirmModal.classList.contains("show")) {
+        closeConfirmModal();
+      }
+    });
+
+    document.getElementById("btnCancel").addEventListener("click", () => {
+      window.location.href = "audit-list-prototype.html?admin=1";
+    });
+
+    document.getElementById("btnSubmit").addEventListener("click", () => {
+      const ticketId = getQueryTicketId();
+      const result = getSelectedResult();
+      if (!result) {
+        alert("请选择审核结果（完结 / 未完结）");
+        return;
+      }
+      const remark = (document.getElementById("auditRemark") && document.getElementById("auditRemark").value) || "";
+      const lines = [`审核结果：${result}`];
+      lines.push(remark.trim() ? `审核备注：${remark.trim()}` : "审核备注：（未填写）");
+      lines.push(`工单：${ticketId}`);
+      pendingForm = { ticketId, result, remark: remark.trim() };
+      openConfirmModal(lines.join("\n"));
+    });
+
+    (function init() {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("admin") === "1") {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        }
+      } catch (e) {}
+      if (!isAuditListAdmin()) {
+        renderError(
+          '需要<strong>管理员模式</strong>。请在审核列表地址后添加 <code>?admin=1</code> 进入一次，再使用「改审核结果」。<br/><a href="audit-list-prototype.html?admin=1">打开审核列表（管理员）</a>'
+        );
+        return;
+      }
+      const ticketId = getQueryTicketId();
+      if (!ticketId) {
+        renderError('缺少工单参数。<a href="audit-list-prototype.html?admin=1">返回审核列表</a>');
+        return;
+      }
+      const row = resolveEditRow(ticketId);
+      if (!canEditRow(row)) {
+        renderError(
+          '当前工单不允许在此修改（需为已审核且不再继续流转）。请从列表点击「查看」或「改审核结果」进入。<br/><a href="audit-list-prototype.html?admin=1">返回审核列表</a>'
+        );
+        return;
+      }
+      renderForm(row);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>审核列表页原型</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #e7eaf0;
+      --text: #1f2d3d;
+      --sub: #667085;
+      --blue: #2f54eb;
+      --green: #12b76a;
+      --red: #f04438;
+      --orange: #f79009;
+      --gray: #98a2b3;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: 96%;
+      max-width: 1600px;
+      margin: 24px auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .field input,
+    .field select {
+      height: 34px;
+      border: 1px solid #d0d5dd;
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(47, 84, 235, 0.12);
+    }
+
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-range input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .date-sep {
+      color: #98a2b3;
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .actions-left {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      padding: 0 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .btn-default {
+      background: #fff;
+      border-color: #d0d5dd;
+      color: #344054;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1380px;
+      background: #fff;
+    }
+
+    thead th {
+      background: #f9fafb;
+      color: #475467;
+      font-size: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--line);
+      padding: 11px 10px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      font-size: 13px;
+      border-bottom: 1px solid #f1f3f7;
+      padding: 10px;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #fafcff;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      line-height: 22px;
+      border-radius: 11px;
+      padding: 0 9px;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .b-gray { background: var(--gray); }
+    .b-blue { background: var(--blue); }
+    .b-green { background: var(--green); }
+    .b-red { background: var(--red); }
+    .b-orange { background: var(--orange); }
+    .b-purple { background: #7c3aed; }
+
+    .badge.badge-flow-long {
+      max-width: 200px;
+      height: auto;
+      line-height: 1.35;
+      padding: 5px 10px;
+      white-space: normal;
+      text-align: center;
+    }
+
+    .op-btn {
+      border: none;
+      background: transparent;
+      color: var(--blue);
+      padding: 0;
+      margin-right: 10px;
+      font-size: 13px;
+    }
+
+    .op-btn.secondary {
+      color: #175cd3;
+      font-weight: 600;
+    }
+
+    .op-btn:disabled,
+    .op-btn.op-btn--muted {
+      color: #98a2b3 !important;
+      cursor: not-allowed;
+      opacity: 0.75;
+    }
+
+    .linked-wrap {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .link-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 18px;
+      background: #f2f4f7;
+      color: #344054;
+    }
+
+    .link-chip.up {
+      background: #eef4ff;
+      color: #175cd3;
+    }
+
+    .link-chip.down {
+      background: #ecfdf3;
+      color: #067647;
+    }
+
+    .link-chip a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed currentColor;
+    }
+
+    .link-chip a:hover {
+      opacity: 0.8;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      color: #475467;
+      font-size: 12px;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-btn {
+      min-width: 72px;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      color: #344054;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: #2f54eb;
+      color: #2f54eb;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .page-nums {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-num {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #d0d5dd;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      color: #475467;
+    }
+
+    .page-num:hover:not(.is-active) {
+      border-color: #b3c7ff;
+      color: #2f54eb;
+    }
+
+    .page-num.is-active {
+      background: #2f54eb;
+      border-color: #2f54eb;
+      color: #fff;
+      cursor: default;
+    }
+
+    .page-meta {
+      font-size: 12px;
+      color: #667085;
+      white-space: nowrap;
+    }
+
+    .empty {
+      text-align: center;
+      color: #98a2b3;
+      padding: 24px 0;
+    }
+
+    .file-input-wrap {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrap input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .import-result-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .import-result-box .stat {
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .import-result-box .stat-ok {
+      color: var(--green);
+    }
+
+    .import-result-box .stat-fail {
+      color: var(--red);
+    }
+
+    .import-fail-album-block {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #e4e7ec;
+    }
+
+    .import-fail-album-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475467;
+      margin: 0 0 10px;
+    }
+
+    .import-fail-album-item {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .import-fail-album-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .import-fail-k {
+      display: inline-block;
+      min-width: 64px;
+      color: #667085;
+      font-size: 12px;
+    }
+
+    .import-fail-v {
+      color: #1f2d3d;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .import-fail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .import-fail-table th,
+    .import-fail-table td {
+      border: 1px solid #eaecf0;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .import-fail-table th {
+      background: #f2f4f7;
+      color: #475467;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .import-modal-dialog {
+      width: min(440px, 100%);
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    .import-modal-head {
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .import-modal-body {
+      padding: 16px 20px 20px;
+    }
+
+    .import-modal-desc {
+      font-size: 13px;
+      color: #475467;
+      line-height: 1.65;
+      margin: 0 0 16px;
+    }
+
+    .import-modal-desc strong {
+      font-weight: 700;
+      color: #1f2d3d;
+    }
+
+    .import-progress-wrap {
+      display: none;
+      margin: 0 0 16px;
+    }
+
+    .import-progress-wrap.is-visible {
+      display: block;
+    }
+
+    .import-progress-label {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 6px;
+    }
+
+    .import-progress-track {
+      height: 8px;
+      background: #eaecf0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .import-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue), #5b8cff);
+      border-radius: 999px;
+      transition: width 0.28s ease;
+    }
+
+    .import-modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .import-demo-row {
+      margin-top: 10px;
+    }
+
+    .import-demo-btn {
+      height: auto;
+      min-height: 28px;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-color: #e4e7ec;
+      color: #667085;
+    }
+
+    .import-demo-btn:hover {
+      border-color: #d0d5dd;
+      color: #344054;
+    }
+
+    .import-modal-foot {
+      padding: 0 20px 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 1200px) {
+      .filters {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="filters">
+        <div class="field">
+          <label for="channel">渠道</label>
+          <select id="channel">
+            <option value="">全部</option>
+            <option value="主播主动申请">主播主动申请</option>
+            <option value="机审回扫">机审回扫</option>
+            <option value="手动导入">手动导入</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="method">审核方式</label>
+          <select id="method">
+            <option value="">全部</option>
+            <option value="机审">机审</option>
+            <option value="人审">人审</option>
+            <option value="申诉">申诉</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="albumId">专辑ID</label>
+          <input id="albumId" placeholder="请输入专辑ID（精确）" />
+        </div>
+        <div class="field">
+          <label for="auditStatus">审核状态</label>
+          <select id="auditStatus">
+            <option value="">全部</option>
+            <option value="待审核">待审核</option>
+            <option value="已审核">已审核</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="auditResult">审核结果</label>
+          <select id="auditResult">
+            <option value="">全部</option>
+            <option value="完结">完结</option>
+            <option value="未完结">未完结</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="timeStart">审核时间</label>
+          <div class="date-range">
+            <input id="timeStart" type="date" />
+            <span class="date-sep">至</span>
+            <input id="timeEnd" type="date" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="flowContinue">是否继续流转</label>
+          <select id="flowContinue">
+            <option value="">全部</option>
+            <option value="暂不确定">暂不确定</option>
+            <option value="72小时申诉窗口期">72小时申诉窗口期</option>
+            <option value="是">是</option>
+            <option value="否">否</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-left">
+          <button class="btn-primary" type="button" id="searchBtn">查询</button>
+          <button class="btn-default" type="button" id="resetBtn">重置</button>
+        </div>
+        <button class="btn-primary" type="button" id="openImportModalBtn">手动导入工单</button>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+      <div class="import-modal-dialog" id="importModalDialog">
+        <div class="import-modal-head" id="importModalTitle">手动导入工单</div>
+        <div class="import-modal-body">
+          <p class="import-modal-desc">
+            此处导入的工单默认为<strong>手动导入</strong>渠道下的<strong>人审</strong>工单，导入成功后支持人工审核。请下载模板填写专辑ID和专辑名称并上传，系统根据专辑信息自动拉取声音信息并创建工单。
+          </p>
+          <div id="importProgressWrap" class="import-progress-wrap">
+            <div class="import-progress-label">正在导入，请稍候…</div>
+            <div class="import-progress-track">
+              <div class="import-progress-bar" id="importProgressBar"></div>
+            </div>
+          </div>
+          <div class="import-modal-actions">
+            <button type="button" class="btn-default" id="downloadImportTemplate">下载 Excel 模板</button>
+            <div class="file-input-wrap">
+              <button type="button" class="btn-primary">上传 Excel 导入</button>
+              <input type="file" id="importExcelInput" accept=".xlsx,.xls" />
+            </div>
+          </div>
+          <div class="import-demo-row">
+            <button type="button" class="btn-default import-demo-btn" id="demoImportTwoFails">
+              演示：2 条失败（假数据，不写入列表）
+            </button>
+          </div>
+          <div id="importResultBox" class="import-result-box" style="display:none"></div>
+        </div>
+        <div class="import-modal-foot">
+          <button type="button" class="btn-default" id="importModalClose">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>渠道ID</th>
+              <th>渠道</th>
+              <th>审核方式</th>
+              <th>工单ID</th>
+              <th>专辑ID</th>
+              <th>专辑名称</th>
+              <th>审核状态</th>
+              <th>审核结果</th>
+              <th>审核时间</th>
+              <th>是否继续流转</th>
+              <th>关联工单</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div>
+          <span id="countText">共 0 条</span>
+          <span class="page-meta" style="margin-left:10px">每页 20 条</span>
+        </div>
+        <div class="pager">
+          <button type="button" class="page-btn" id="pagePrev" disabled>上一页</button>
+          <div class="page-nums" id="pageNums"></div>
+          <button type="button" class="page-btn" id="pageNext" disabled>下一页</button>
+          <span class="page-meta" id="pageInfo">第 — 页</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script>
+    let listData = [
+      // 1) 主播主动申请 + 机审：不存在上下游
+      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409001", albumId: "A90001", albumName: "财经热点早知道", status: "已审核", result: "完结", time: "2026-04-09 09:31:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      // 2) 主播主动申请 + 机审：仅下游唯一工单
+      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409002", albumId: "A90002", albumName: "创业案例拆解", status: "已审核", result: "完结", time: "2026-04-09 09:48:00", flow: "是", linked: { upstream: "", downstream: "RS20260409021" } },
+      // 3) 主播主动申请 + 人审：仅上游唯一工单
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409003", albumId: "A90003", albumName: "亲子英语启蒙", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260408018", downstream: "" } },
+      // 3b) 主播主动申请 + 人审：仅上游（另一条待审核，用于人审「下一个」演示）
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409011", albumId: "A90011", albumName: "睡前故事精选集", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260409001", downstream: "" } },
+      // 3c) 主播主动申请 + 人审：已审核（查看 → 人审页只读，审核结果与审核备注已填且置灰）
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409099", albumId: "A90099", albumName: "自然拼读训练营", status: "已审核", result: "完结", time: "2026-04-03 15:00:00", flow: "否", linked: { upstream: "JS20260409002", downstream: "" } },
+      // 4) 机审回扫 + 机审：不存在上下游
+      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409004", albumId: "A90004", albumName: "历史故事会", status: "已审核", result: "未完结", time: "2026-04-08 10:02:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      // 5) 机审回扫 + 机审：仅下游唯一工单
+      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409005", albumId: "A90005", albumName: "心理学入门", status: "已审核", result: "完结", time: "2026-04-08 11:12:00", flow: "是", linked: { upstream: "", downstream: "RS20260409031" } },
+      // 6) 机审回扫 + 人审：仅上游，待审核（结果未定 → 继续流转暂不确定）
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409006", albumId: "A90006", albumName: "职场表达力训练", status: "待审核", result: "", time: "", flow: "暂不确定", linked: { upstream: "JS20260409005", downstream: "" } },
+      // 6a) 机审回扫 + 人审：第二条待审核（与 RS20260409006 组成人审「下一个」演示）
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409067", albumId: "A90067", albumName: "声音塑造入门课", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
+      // 6d) 机审回扫 + 人审：已审核（查看 → 机审回扫人审页只读，审核结果与审核备注已填且置灰）
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409068", albumId: "A90068", albumName: "即兴演讲训练营", status: "已审核", result: "未完结", time: "2026-04-02 10:00:00", flow: "否", linked: { upstream: "JS20260409004", downstream: "" } },
+      // 6b) 机审回扫 + 人审：人审完结后进入 72 小时申诉窗口期（尚无下游）
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409061", albumId: "A90061", albumName: "城市漫步手记", status: "已审核", result: "完结", time: "2026-04-07 18:00:00", flow: "72小时申诉窗口期", linked: { upstream: "JS20260409012", downstream: "" } },
+      // 6c) 机审回扫 + 人审：72 小时届满未申诉
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409062", albumId: "A90062", albumName: "周末厨房实验", status: "已审核", result: "完结", time: "2026-04-06 12:00:00", flow: "否", linked: { upstream: "JS20260409013", downstream: "" } },
+      // 7) 机审回扫 + 人审：主播已申诉，下游关联申诉工单
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409007", albumId: "A90007", albumName: "高效阅读训练营", status: "已审核", result: "完结", time: "2026-04-07 16:45:00", flow: "是", linked: { upstream: "JS20260409012", downstream: "SS20260409041" } },
+      // 8) 机审回扫 + 申诉：仅上游唯一工单（查看 → 申诉工单页）
+      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409008", albumId: "A90008", albumName: "电影深度解析", status: "已审核", result: "未完结", time: "2026-04-06 13:08:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
+      // 8b) 机审回扫 + 申诉：下游申诉工单示例（申诉理由/凭证为空）
+      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409041", albumId: "A90041", albumName: "古典乐赏析课", status: "已审核", result: "未完结", time: "2026-04-05 11:20:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
+      // 9) 手动导入 + 人审：无上下游（查看 → 手动导入人审页只读，审核结果与审核备注已填且置灰）
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409009", albumId: "A90009", albumName: "直播运营实战课", status: "已审核", result: "完结", time: "2026-04-05 09:20:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      // 10) 手动导入 + 人审：待审核，无上下游（进入人审 → human-audit-manual-import.html）
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409010", albumId: "A90010", albumName: "主播成长方法论", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
+      // 10a) 手动导入 + 人审：第二条待审核（与 RS20260409010 组成人审「下一个」演示）
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409069", albumId: "A90069", albumName: "数据思维入门", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } }
+    ];
+
+    (function appendDemoRowsForPaging() {
+      const templates = listData.slice(0, 8);
+      for (let i = 0; i < 12; i++) {
+        const t = templates[i % 8];
+        const suffix = "P" + String(i + 1).padStart(2, "0");
+        const linked = {
+          upstream: t.linked && t.linked.upstream ? t.linked.upstream : "",
+          downstream: t.linked && t.linked.downstream ? t.linked.downstream : ""
+        };
+        const noUpDown = !linked.upstream && !linked.downstream;
+        listData.push({
+          channelId: t.channelId,
+          channel: t.channel,
+          method: t.method,
+          ticketId: t.ticketId + suffix,
+          albumId: t.albumId + suffix,
+          albumName: t.albumName + "（分页演示）",
+          status: t.status,
+          result: t.result,
+          time: t.time,
+          flow: noUpDown ? "否" : t.flow,
+          linked
+        });
+      }
+    })();
+
+    const ADMIN_SESSION_KEY = "auditListAdmin";
+    const AUDIT_PATCH_KEY = "auditResultPatches";
+
+    (function initAuditListAdminFromUrl() {
+      try {
+        if (new URLSearchParams(window.location.search).get("admin") === "1") {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        }
+      } catch (e) {}
+    })();
+
+    function applyAuditResultPatchesToList() {
+      let patches = {};
+      try {
+        patches = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+      } catch (e) {
+        return;
+      }
+      listData.forEach((row, i) => {
+        const p = patches[row.ticketId];
+        if (!p) return;
+        listData[i] = {
+          ...row,
+          result: p.result != null ? p.result : row.result,
+          remark: p.remark !== undefined ? p.remark : row.remark,
+          time: p.time || row.time
+        };
+      });
+    }
+
+    applyAuditResultPatchesToList();
+
+    function isAuditListAdmin() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function canAdminEditAuditRow(row) {
+      return (
+        isAuditListAdmin() &&
+        row.status === "已审核" &&
+        row.flow === "否"
+      );
+    }
+
+    /** 从列表「查看」跳转时附带：管理员模式下写入 admin=1，且仅对可改结果的行加 ae=1 */
+    function adminViewQuerySuffix(row) {
+      if (!isAuditListAdmin()) return "";
+      let s = "&admin=1";
+      if (row && row.status === "已审核" && row.flow === "否") s += "&ae=1";
+      return s;
+    }
+
+    const statusClassMap = {
+      "待审核": "b-gray",
+      "已审核": "b-green"
+    };
+
+    const resultClassMap = {
+      "完结": "b-green",
+      "未完结": "b-orange"
+    };
+
+    const flowClassMap = {
+      "是": "b-green",
+      "否": "b-gray",
+      "暂不确定": "b-orange",
+      "72小时申诉窗口期": "b-purple"
+    };
+
+    const channelSelect = document.getElementById("channel");
+    const methodSelect = document.getElementById("method");
+    const albumIdInput = document.getElementById("albumId");
+    const auditStatusSelect = document.getElementById("auditStatus");
+    const auditResultSelect = document.getElementById("auditResult");
+    const timeStartInput = document.getElementById("timeStart");
+    const timeEndInput = document.getElementById("timeEnd");
+    const flowContinueSelect = document.getElementById("flowContinue");
+    const tableBody = document.getElementById("tableBody");
+    const countText = document.getElementById("countText");
+    const pagePrev = document.getElementById("pagePrev");
+    const pageNext = document.getElementById("pageNext");
+    const pageNums = document.getElementById("pageNums");
+    const pageInfo = document.getElementById("pageInfo");
+
+    const PAGE_SIZE = 20;
+    let currentPage = 1;
+    let lastFilteredData = [];
+
+    function parseDate(value) {
+      if (!value) return null;
+      return new Date(value).getTime();
+    }
+
+    function parseRecordTime(value) {
+      if (!value) return 0;
+      return new Date(value.replace(" ", "T")).getTime();
+    }
+
+    function sortByDefaultRule(data) {
+      return [...data].sort((a, b) => {
+        const aPending = a.status === "待审核";
+        const bPending = b.status === "待审核";
+        if (aPending !== bPending) {
+          return aPending ? -1 : 1;
+        }
+        if (aPending && bPending) {
+          return 0;
+        }
+        return parseRecordTime(b.time) - parseRecordTime(a.time);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatLinkedTickets(linkedTickets) {
+      if (!linkedTickets || (!linkedTickets.upstream && !linkedTickets.downstream)) {
+        return '<span class="link-chip">无上下游</span>';
+      }
+      const blocks = [];
+      if (linkedTickets.upstream) {
+        blocks.push(
+          `<span class="link-chip up">↑上游：<a href="ticket-detail.html?ticketId=${linkedTickets.upstream}" target="_blank">${linkedTickets.upstream}</a></span>`
+        );
+      }
+      if (linkedTickets.downstream) {
+        blocks.push(
+          `<span class="link-chip down">↓下游：<a href="ticket-detail.html?ticketId=${linkedTickets.downstream}" target="_blank">${linkedTickets.downstream}</a></span>`
+        );
+      }
+      return `<span class="linked-wrap">${blocks.join("")}</span>`;
+    }
+
+    function getTotalPages(total) {
+      if (total <= 0) return 1;
+      return Math.ceil(total / PAGE_SIZE);
+    }
+
+    function renderTableRows(data) {
+      if (!data.length) {
+        tableBody.innerHTML = '<tr><td colspan="12" class="empty">暂无符合条件的数据</td></tr>';
+        return;
+      }
+
+      const html = data.map(item => {
+        const name = escapeHtml(item.albumName);
+        const humanReviewPending = item.method === "人审" && item.status === "待审核";
+        const manualBtn = humanReviewPending
+          ? `<button type="button" class="op-btn secondary js-manual-audit" data-ticket-id="${escapeHtml(item.ticketId)}">进入人审</button>`
+          : "";
+        const viewBtn = humanReviewPending
+          ? `<button type="button" class="op-btn js-view-detail op-btn--muted" data-ticket-id="${escapeHtml(item.ticketId)}" disabled title="完成人审后可查看">查看</button>`
+          : `<button type="button" class="op-btn js-view-detail" data-ticket-id="${escapeHtml(item.ticketId)}">查看</button>`;
+        const adminEditBtn = canAdminEditAuditRow(item)
+          ? `<button type="button" class="op-btn secondary js-admin-edit-audit" data-ticket-id="${escapeHtml(item.ticketId)}">改审核结果</button>`
+          : "";
+        return `
+        <tr>
+          <td>${escapeHtml(item.channelId)}</td>
+          <td>${escapeHtml(item.channel)}</td>
+          <td>${escapeHtml(item.method)}</td>
+          <td>${escapeHtml(item.ticketId)}</td>
+          <td>${escapeHtml(item.albumId)}</td>
+          <td title="${name}">${name}</td>
+          <td><span class="badge ${statusClassMap[item.status] || "b-gray"}">${escapeHtml(item.status)}</span></td>
+          <td>${item.result
+            ? `<span class="badge ${resultClassMap[item.result] || "b-gray"}">${escapeHtml(item.result)}</span>`
+            : "-"}</td>
+          <td>${item.time ? escapeHtml(item.time) : "-"}</td>
+          <td><span class="badge ${flowClassMap[item.flow] || "b-gray"}${item.flow && item.flow.length > 3 ? " badge-flow-long" : ""}">${escapeHtml(item.flow)}</span></td>
+          <td>${formatLinkedTickets(item.linked)}</td>
+          <td>
+            ${viewBtn}
+            ${adminEditBtn}
+            ${manualBtn}
+          </td>
+        </tr>
+      `;
+      }).join("");
+
+      tableBody.innerHTML = html;
+    }
+
+    function updatePaginationControls() {
+      const total = lastFilteredData.length;
+      const totalPages = getTotalPages(total);
+
+      countText.textContent = `共 ${total} 条`;
+
+      if (total === 0) {
+        pageInfo.textContent = "第 — 页";
+        pagePrev.disabled = true;
+        pageNext.disabled = true;
+        pageNums.innerHTML = "";
+        return;
+      }
+
+      pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
+      pagePrev.disabled = currentPage <= 1;
+      pageNext.disabled = currentPage >= totalPages;
+
+      let numsHtml = "";
+      for (let i = 1; i <= totalPages; i++) {
+        numsHtml += `<button type="button" class="page-num${i === currentPage ? " is-active" : ""}" data-page="${i}" ${i === currentPage ? " aria-current=\"page\"" : ""}>${i}</button>`;
+      }
+      pageNums.innerHTML = numsHtml;
+    }
+
+    function refreshListView() {
+      const total = lastFilteredData.length;
+      const totalPages = getTotalPages(total);
+      if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+      if (currentPage < 1) currentPage = 1;
+
+      if (total === 0) {
+        renderTableRows([]);
+      } else {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        renderTableRows(lastFilteredData.slice(start, start + PAGE_SIZE));
+      }
+      updatePaginationControls();
+    }
+
+    function setFilteredData(sorted) {
+      lastFilteredData = sorted;
+      currentPage = 1;
+      refreshListView();
+    }
+
+    function goToPage(p) {
+      const totalPages = getTotalPages(lastFilteredData.length);
+      const next = Math.min(Math.max(1, p), totalPages);
+      if (next === currentPage) return;
+      currentPage = next;
+      refreshListView();
+    }
+
+    function runFilter() {
+      const channel = channelSelect.value.trim();
+      const method = methodSelect.value.trim();
+      const albumId = albumIdInput.value.trim();
+      const status = auditStatusSelect.value.trim();
+      const result = auditResultSelect.value.trim();
+      const flow = flowContinueSelect.value.trim();
+      const startTime = parseDate(timeStartInput.value);
+      const endTime = parseDate(timeEndInput.value);
+
+      const filtered = listData.filter(item => {
+        const recordTime = parseRecordTime(item.time);
+        if (channel && item.channel !== channel) return false;
+        if (method && item.method !== method) return false;
+        if (albumId && item.albumId !== albumId) return false;
+        if (status && item.status !== status) return false;
+        if (result && item.result !== result) return false;
+        if (flow && item.flow !== flow) return false;
+        if (startTime && recordTime < startTime) return false;
+        if (endTime && recordTime > (endTime + 24 * 60 * 60 * 1000 - 1)) return false;
+        return true;
+      });
+
+      setFilteredData(sortByDefaultRule(filtered));
+    }
+
+    function updateMethodOptionsByChannel() {
+      const selectedChannel = channelSelect.value.trim();
+      const methodOptions = methodSelect.querySelectorAll("option");
+      methodOptions.forEach(option => {
+        if (!option.value) {
+          option.disabled = false;
+          return;
+        }
+        if (selectedChannel === "手动导入") {
+          option.disabled = option.value !== "人审";
+        } else {
+          option.disabled = false;
+        }
+      });
+      if (selectedChannel === "手动导入" && methodSelect.value && methodSelect.value !== "人审") {
+        methodSelect.value = "人审";
+      }
+    }
+
+    function resetFilter() {
+      channelSelect.value = "";
+      methodSelect.value = "";
+      albumIdInput.value = "";
+      auditStatusSelect.value = "";
+      auditResultSelect.value = "";
+      timeStartInput.value = "";
+      timeEndInput.value = "";
+      flowContinueSelect.value = "";
+      updateMethodOptionsByChannel();
+      setFilteredData(sortByDefaultRule(listData));
+    }
+
+    function onView(ticketId) {
+      const row = listData.find(i => i.ticketId === ticketId);
+      if (row) {
+        try {
+          sessionStorage.setItem("ticketContext_" + ticketId, JSON.stringify(row));
+        } catch (e) {}
+      }
+      if (row && row.method === "人审" && row.status === "已审核") {
+        if (row.channel === "主播主动申请") {
+          window.location.href = `human-audit-anchor-apply.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&_=${Date.now()}${adminViewQuerySuffix(row)}`;
+          return;
+        }
+        if (row.channel === "机审回扫") {
+          window.location.href = `human-audit-rescan.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&_=${Date.now()}${adminViewQuerySuffix(row)}`;
+          return;
+        }
+        if (row.channel === "手动导入") {
+          window.location.href = `human-audit-manual-import.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&_=${Date.now()}${adminViewQuerySuffix(row)}`;
+          return;
+        }
+      }
+      if (row && row.method === "申诉") {
+        window.location.href = `appeal-ticket-view.html?ticketId=${encodeURIComponent(ticketId)}&_=${Date.now()}${adminViewQuerySuffix(row)}`;
+        return;
+      }
+      window.location.href = `ticket-detail.html?ticketId=${encodeURIComponent(ticketId)}&_=${Date.now()}${adminViewQuerySuffix(row)}`;
+    }
+
+    function onAdminEditAudit(ticketId) {
+      const row = listData.find(i => i.ticketId === ticketId);
+      if (!row || !canAdminEditAuditRow(row)) return;
+      try {
+        sessionStorage.setItem("adminEditTicketRow", JSON.stringify(row));
+      } catch (e) {}
+      window.location.href = `admin-audit-result.html?ticketId=${encodeURIComponent(ticketId)}&admin=1&_=${Date.now()}`;
+    }
+
+    function onManualAudit(ticketId) {
+      const row = listData.find(i => i.ticketId === ticketId);
+      if (!row) return;
+      if (row.channel === "主播主动申请" && row.method === "人审" && row.status === "待审核") {
+        const queue = sortByDefaultRule(
+          listData.filter(
+            i => i.channel === "主播主动申请" && i.method === "人审" && i.status === "待审核"
+          )
+        ).map(i => i.ticketId);
+        sessionStorage.setItem("humanAuditQueueAnchorApply", JSON.stringify(queue));
+        window.location.href = `human-audit-anchor-apply.html?ticketId=${encodeURIComponent(ticketId)}&_=${Date.now()}`;
+        return;
+      }
+      if (row.channel === "机审回扫" && row.method === "人审" && row.status === "待审核") {
+        const queue = sortByDefaultRule(
+          listData.filter(
+            i => i.channel === "机审回扫" && i.method === "人审" && i.status === "待审核"
+          )
+        ).map(i => i.ticketId);
+        sessionStorage.setItem("humanAuditQueueRescan", JSON.stringify(queue));
+        window.location.href = `human-audit-rescan.html?ticketId=${encodeURIComponent(ticketId)}&_=${Date.now()}`;
+        return;
+      }
+      if (row.channel === "手动导入" && row.method === "人审" && row.status === "待审核") {
+        const queue = sortByDefaultRule(
+          listData.filter(
+            i => i.channel === "手动导入" && i.method === "人审" && i.status === "待审核"
+          )
+        ).map(i => i.ticketId);
+        sessionStorage.setItem("humanAuditQueueManualImport", JSON.stringify(queue));
+        window.location.href = `human-audit-manual-import.html?ticketId=${encodeURIComponent(ticketId)}&_=${Date.now()}`;
+        return;
+      }
+      alert("当前原型仅开放「主播主动申请」「机审回扫」「手动导入」渠道的人审页面，其他渠道敬请期待。");
+    }
+
+    tableBody.addEventListener("click", e => {
+      const btn = e.target.closest("button[data-ticket-id]");
+      if (!btn) return;
+      const ticketId = btn.getAttribute("data-ticket-id");
+      if (!ticketId) return;
+      if (btn.classList.contains("js-view-detail")) {
+        onView(ticketId);
+      } else if (btn.classList.contains("js-admin-edit-audit")) {
+        onAdminEditAudit(ticketId);
+      } else if (btn.classList.contains("js-manual-audit")) {
+        onManualAudit(ticketId);
+      }
+    });
+
+    pagePrev.addEventListener("click", () => goToPage(currentPage - 1));
+    pageNext.addEventListener("click", () => goToPage(currentPage + 1));
+
+    pageNums.addEventListener("click", e => {
+      const btn = e.target.closest("button[data-page]");
+      if (!btn) return;
+      const p = parseInt(btn.getAttribute("data-page"), 10);
+      if (!Number.isFinite(p)) return;
+      goToPage(p);
+    });
+
+    channelSelect.addEventListener("change", updateMethodOptionsByChannel);
+    document.getElementById("searchBtn").addEventListener("click", runFilter);
+    document.getElementById("resetBtn").addEventListener("click", resetFilter);
+
+    updateMethodOptionsByChannel();
+    setFilteredData(sortByDefaultRule(listData));
+
+    (function initAdminAndImport() {
+      const importModal = document.getElementById("importModal");
+      const importModalDialog = document.getElementById("importModalDialog");
+
+      function openImportModal() {
+        importModal.classList.add("show");
+        const resultBox = document.getElementById("importResultBox");
+        const progressWrap = document.getElementById("importProgressWrap");
+        const progressBar = document.getElementById("importProgressBar");
+        resultBox.style.display = "none";
+        resultBox.innerHTML = "";
+        progressWrap.classList.remove("is-visible");
+        if (progressBar) progressBar.style.width = "0%";
+      }
+
+      function closeImportModal() {
+        importModal.classList.remove("show");
+      }
+
+      document.getElementById("openImportModalBtn").addEventListener("click", openImportModal);
+      document.getElementById("importModalClose").addEventListener("click", closeImportModal);
+      importModal.addEventListener("click", e => {
+        if (e.target === importModal) closeImportModal();
+      });
+      importModalDialog.addEventListener("click", e => e.stopPropagation());
+
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && importModal.classList.contains("show")) closeImportModal();
+      });
+
+      function renderImportResultBox(success, failures, options) {
+        const opts = options || {};
+        const resultBox = document.getElementById("importResultBox");
+        const failCount = failures.length;
+        let html = `<div class="stat stat-ok">导入成功：${success} 条</div>`;
+        html += `<div class="stat stat-fail">导入失败：${failCount} 条</div>`;
+        if (failCount > 0) {
+          html += '<div class="import-fail-album-block">';
+          html += '<div class="import-fail-album-label">失败工单的专辑信息</div>';
+          failures.forEach(f => {
+            html += '<div class="import-fail-album-item">';
+            html += `<div><span class="import-fail-k">专辑ID</span><span class="import-fail-v">${escapeHtml(f.albumId)}</span></div>`;
+            html += `<div style="margin-top:6px"><span class="import-fail-k">专辑名称</span><span class="import-fail-v">${escapeHtml(f.albumName)}</span></div>`;
+            html += "</div>";
+          });
+          html += "</div>";
+        }
+        resultBox.innerHTML = html;
+        resultBox.style.display = "block";
+        if (!opts.skipRefreshList) {
+          applyAuditResultPatchesToList();
+          setFilteredData(sortByDefaultRule(listData));
+        }
+      }
+
+      document.getElementById("demoImportTwoFails").addEventListener("click", () => {
+        renderImportResultBox(
+          0,
+          [
+            { albumId: "A90010", albumName: "主播成长方法论" },
+            { albumId: "A90222", albumName: "—" }
+          ],
+          { skipRefreshList: true }
+        );
+      });
+
+      const IMPORT_DETAIL_KEY = "manualImportTicketDetails";
+
+      function defaultChaptersForAlbum(albumName) {
+        const n = albumName || "该专辑";
+        return [
+          { title: "第 1 章｜试听样音", asr: `《${n}》样音章节，供人工审核试听与 ASR 核对。` },
+          { title: "第 2 章｜内容节选", asr: "本段为导入工单默认占位文稿，实际上线后将替换为真实 ASR。" },
+          { title: "第 3 章｜内容节选", asr: "本段为导入工单默认占位文稿，实际上线后将替换为真实 ASR。" },
+          { title: "第 4 章｜内容节选", asr: "本段为导入工单默认占位文稿，实际上线后将替换为真实 ASR。" },
+          { title: "第 5 章｜内容节选", asr: "本段为导入工单默认占位文稿，实际上线后将替换为真实 ASR。" }
+        ];
+      }
+
+      function nextManualImportTicketId() {
+        const ymd =
+          new Date().getFullYear().toString() +
+          String(new Date().getMonth() + 1).padStart(2, "0") +
+          String(new Date().getDate()).padStart(2, "0");
+        let seq = parseInt(sessionStorage.getItem("manualImportIdSeq") || "0", 10);
+        seq += 1;
+        sessionStorage.setItem("manualImportIdSeq", String(seq));
+        return `RS${ymd}${String(seq).padStart(4, "0")}`;
+      }
+
+      function persistImportedDetail(ticketId, albumId, albumName) {
+        let map = {};
+        try {
+          map = JSON.parse(sessionStorage.getItem(IMPORT_DETAIL_KEY) || "{}");
+        } catch {
+          map = {};
+        }
+        map[ticketId] = {
+          channelId: "1003",
+          channel: "手动导入",
+          albumId,
+          albumName,
+          anchorLevel: "Lv.4 认证主播",
+          chapters: defaultChaptersForAlbum(albumName)
+        };
+        sessionStorage.setItem(IMPORT_DETAIL_KEY, JSON.stringify(map));
+      }
+
+      function normalizeHeader(s) {
+        return String(s || "")
+          .replace(/\s/g, "")
+          .toLowerCase();
+      }
+
+      function pickColumns(firstRow) {
+        let idxId = -1;
+        let idxName = -1;
+        const keys = Array.isArray(firstRow) ? firstRow.map((c, i) => ({ c, i })) : [];
+        for (const { c, i } of keys) {
+          const h = normalizeHeader(c);
+          if (h === "专辑id") idxId = i;
+          if (h === "专辑名称" || h === "专辑名") idxName = i;
+        }
+        return { idxId, idxName };
+      }
+
+      document.getElementById("downloadImportTemplate").addEventListener("click", () => {
+        if (typeof XLSX === "undefined") {
+          alert("Excel 组件加载中，请稍后重试。");
+          return;
+        }
+        const ws = XLSX.utils.aoa_to_sheet([
+          ["专辑ID", "专辑名称"],
+          ["A90100", "示例专辑名称"]
+        ]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+        XLSX.writeFile(wb, "手动导入工单模板.xlsx");
+      });
+
+      document.getElementById("importExcelInput").addEventListener("change", function () {
+        const file = this.files && this.files[0];
+        this.value = "";
+        if (!file) return;
+        if (typeof XLSX === "undefined") {
+          alert("Excel 组件未加载，请检查网络后刷新页面。");
+          return;
+        }
+
+        const progressWrap = document.getElementById("importProgressWrap");
+        const progressBar = document.getElementById("importProgressBar");
+        const resultBox = document.getElementById("importResultBox");
+
+        function setProgress(p) {
+          progressBar.style.width = Math.min(100, Math.max(0, p)) + "%";
+        }
+
+        function showProgress() {
+          resultBox.style.display = "none";
+          resultBox.innerHTML = "";
+          progressWrap.classList.add("is-visible");
+          setProgress(0);
+        }
+
+        function hideProgress() {
+          progressWrap.classList.remove("is-visible");
+          setProgress(0);
+        }
+
+        showProgress();
+        requestAnimationFrame(() => setProgress(10));
+
+        const reader = new FileReader();
+        reader.onerror = function () {
+          hideProgress();
+          resultBox.style.display = "block";
+          resultBox.innerHTML =
+            '<div class="stat stat-fail">文件读取失败，请重试。</div>';
+        };
+        reader.onload = function (ev) {
+          setProgress(22);
+          setTimeout(() => {
+            let success = 0;
+            const failures = [];
+            try {
+              const data = new Uint8Array(ev.target.result);
+              setProgress(34);
+              const wb = XLSX.read(data, { type: "array" });
+              if (!wb.SheetNames || wb.SheetNames.length === 0) {
+                failures.push({
+                  line: "-",
+                  albumId: "—",
+                  albumName: "—",
+                  reason: "Excel 中无任何工作表"
+                });
+              } else {
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+                setProgress(42);
+                if (!matrix.length) {
+                  failures.push({
+                    line: "-",
+                    albumId: "—",
+                    albumName: "—",
+                    reason: "表格为空"
+                  });
+                } else {
+                  const header = matrix[0];
+                  const { idxId, idxName } = pickColumns(header);
+                  if (idxId < 0 || idxName < 0) {
+                    failures.push({
+                      line: "1",
+                      albumId: "—",
+                      albumName: "—",
+                      reason: "未找到表头「专辑ID」「专辑名称」，请使用模板"
+                    });
+                  } else {
+                    const existingIds = new Set(listData.map(r => r.albumId));
+                    const totalRows = matrix.length - 1;
+                    for (let r = 1; r < matrix.length; r++) {
+                      const row = matrix[r];
+                      const albumId = String(row[idxId] != null ? row[idxId] : "").trim();
+                      const albumName = String(row[idxName] != null ? row[idxName] : "").trim();
+                      const lineNo = r + 1;
+                      setProgress(42 + Math.floor((48 * (r - 1)) / Math.max(totalRows, 1)));
+                      if (!albumId && !albumName) continue;
+                      if (!albumId || !albumName) {
+                        failures.push({
+                          line: String(lineNo),
+                          albumId: albumId || "—",
+                          albumName: albumName || "—",
+                          reason: "专辑ID或专辑名称为空"
+                        });
+                        continue;
+                      }
+                      if (existingIds.has(albumId)) {
+                        failures.push({
+                          line: String(lineNo),
+                          albumId,
+                          albumName,
+                          reason: "专辑ID已存在"
+                        });
+                        continue;
+                      }
+                      const ticketId = nextManualImportTicketId();
+                      existingIds.add(albumId);
+                      listData.push({
+                        channelId: "1003",
+                        channel: "手动导入",
+                        method: "人审",
+                        ticketId,
+                        albumId,
+                        albumName,
+                        status: "待审核",
+                        result: "",
+                        time: "",
+                        flow: "否",
+                        linked: { upstream: "", downstream: "" }
+                      });
+                      persistImportedDetail(ticketId, albumId, albumName);
+                      success++;
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              failures.push({
+                line: "-",
+                albumId: "—",
+                albumName: "—",
+                reason: "解析失败：" + (err && err.message ? err.message : "未知错误")
+              });
+            }
+
+            setProgress(100);
+            setTimeout(() => {
+              hideProgress();
+              renderImportResultBox(success, failures);
+            }, 280);
+          }, 120);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>人审处理 · 手动导入</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #e7eaf0;
+      --text: #1f2d3d;
+      --sub: #667085;
+      --blue: #2f54eb;
+      --green: #12b76a;
+      --orange: #f79009;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 96px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .crumb {
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .crumb a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .crumb a:hover {
+      text-decoration: underline;
+    }
+
+    .crumb strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .wrap {
+      width: 96%;
+      max-width: 1040px;
+      margin: 20px auto;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f3f7;
+    }
+
+    .grid-basic {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 14px 28px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-row label {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .field-row .value {
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .chapter {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fafbff;
+    }
+
+    .chapter:last-child {
+      margin-bottom: 0;
+    }
+
+    .chapter-hd {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #344054;
+    }
+
+    .audio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .audio-row audio {
+      flex: 1;
+      min-width: 220px;
+      height: 36px;
+      vertical-align: middle;
+    }
+
+    .asr {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #475467;
+      background: #fff;
+      border: 1px solid #eaecf0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      max-height: min(56vh, 520px);
+      min-height: 100px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .apply-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #344054;
+      white-space: pre-wrap;
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px dashed #d0d5dd;
+    }
+
+    .files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .file-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #f2f4f7;
+      color: #175cd3;
+      font-size: 13px;
+      text-decoration: none;
+      border: 1px solid #eaecf0;
+    }
+
+    .file-link:hover {
+      background: #eef4ff;
+    }
+
+    .audit-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .audit-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #344054;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .radio-group label {
+      font-weight: 400;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .audit-row textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 10px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .audit-row textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(47, 84, 235, 0.12);
+    }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 -4px 12px rgba(16, 24, 40, 0.06);
+      z-index: 50;
+    }
+
+    .footer-bar .footer-spacer {
+      flex: 1;
+      min-width: 8px;
+    }
+
+    .btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-default {
+      background: #fff;
+      border-color: #d0d5dd;
+      color: #344054;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.45);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-dialog {
+      width: min(400px, 100%);
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      position: relative;
+      pointer-events: auto;
+    }
+
+    .modal-head {
+      padding: 18px 20px 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 14px 20px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #475467;
+    }
+
+    .modal-summary {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #eaecf0;
+      font-size: 13px;
+      color: #344054;
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 0 20px 18px;
+    }
+
+    .toast {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9990;
+      background: #1f2d3d;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .empty-end {
+      text-align: center;
+      padding: 48px 24px 56px;
+    }
+
+    .empty-end .empty-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 20px;
+      line-height: 1.55;
+    }
+
+    .empty-end .empty-link {
+      display: inline-block;
+      color: var(--blue);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .empty-end .empty-link:hover {
+      text-decoration: underline;
+    }
+
+    .empty-end-done {
+      text-align: center;
+      padding: 40px 24px 48px;
+      border: 1px solid #abefc6;
+      background: linear-gradient(180deg, #ecfdf3 0%, #ffffff 45%);
+    }
+
+    .empty-end-done .empty-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 12px;
+      line-height: 1.55;
+    }
+
+    .empty-end-done .empty-link {
+      display: inline-block;
+      color: var(--blue);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .empty-end-done .empty-link:hover {
+      text-decoration: underline;
+    }
+
+    .done-badge {
+      width: 56px;
+      height: 56px;
+      line-height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: #12b76a;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .empty-sub {
+      font-size: 14px;
+      color: var(--sub);
+      margin: 0 0 22px;
+      line-height: 1.6;
+    }
+
+    #auditInfoSection.audit-readonly input[disabled],
+    #auditInfoSection.audit-readonly textarea[disabled] {
+      cursor: default;
+      opacity: 1;
+      color: #344054;
+      background: #f2f4f7;
+      border-color: #e4e7ec;
+    }
+
+    #auditInfoSection.audit-readonly .radio-group label {
+      cursor: default;
+      color: #475467;
+    }
+
+    @media (max-width: 720px) {
+      .grid-basic {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="crumb">
+      <a href="audit-list-prototype.html">审核列表</a>
+      <span> / </span>
+      <strong>人审处理</strong>
+    </div>
+  </div>
+
+  <div class="wrap" id="mainContent"></div>
+
+  <div class="footer-bar">
+    <button type="button" class="btn btn-primary" id="btnAdminEdit" style="display:none">修改审核结果</button>
+    <div class="footer-spacer"></div>
+    <button type="button" class="btn btn-default" id="btnBack">返回</button>
+    <button type="button" class="btn btn-primary" id="btnSubmit">提交并进入下一个</button>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog" id="modalDialogBox">
+      <div class="modal-head" id="modalTitle">确认提交</div>
+      <div class="modal-body">
+        <p style="margin:0">请确认审核结果，提交后不可修改。</p>
+        <div class="modal-summary" id="modalTagSummary"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-default" id="modalCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="modalConfirm">确认提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    const SAMPLE_AUDIO =
+      "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
+
+    const AUDIT_MAIN_INNER_HTML = `
+    <div class="section">
+      <h2 class="section-title">基础信息</h2>
+      <div class="grid-basic" id="basicGrid"></div>
+    </div>
+    <div class="section">
+      <h2 class="section-title">最新 5 章声音</h2>
+      <div id="chaptersBox"></div>
+    </div>
+    <div class="section" id="auditInfoSection">
+      <h2 class="section-title">审核信息</h2>
+      <div class="audit-row">
+        <label>审核结果 <span style="color:#f04438">*</span></label>
+        <div class="radio-group">
+          <label><input type="radio" name="tag" value="完结" /> 完结</label>
+          <label><input type="radio" name="tag" value="未完结" /> 未完结</label>
+        </div>
+      </div>
+      <div class="audit-row">
+        <label for="remark">审核备注（选填）</label>
+        <textarea id="remark" placeholder="可补充说明，非必填"></textarea>
+      </div>
+    </div>`;
+
+    const detailByTicket = {
+      RS20260409010: {
+        channelId: "1003",
+        channel: "手动导入",
+        ticketId: "RS20260409010",
+        albumId: "A90010",
+        albumName: "主播成长方法论",
+        anchorLevel: "Lv.4 认证主播",
+        chapters: [
+          { title: "第 1 章｜账号定位自检", asr: "做主播前先想清楚：你的受众是谁、你擅长讲什么、差异化在哪里。" },
+          { title: "第 2 章｜内容日历规划", asr: "用四周为一个周期排期，避免断更，预留热点插槽。" },
+          { title: "第 3 章｜开播前检查清单", asr: "网络、收音、灯光、封面标题，逐项勾选再上线。" },
+          { title: "第 4 章｜互动话术模板", asr: "欢迎语、点名感谢、引导关注与收藏，可准备三套轮换使用。" },
+          { title: "第 5 章｜数据复盘入门", asr: "看后停留、完播率、转化，先选一个指标本周只优化这一件事。" }
+        ]
+      },
+      RS20260409069: {
+        channelId: "1003",
+        channel: "手动导入",
+        ticketId: "RS20260409069",
+        albumId: "A90069",
+        albumName: "数据思维入门",
+        anchorLevel: "Lv.5 优质主播",
+        chapters: [
+          { title: "第 8 章｜指标与口径", asr: "同一个指标在不同部门可能定义不同，先对齐口径再讨论。" },
+          { title: "第 9 章｜可视化误区", asr: "纵轴不从零截断、饼图类别过多，都会误导决策。" },
+          { title: "第 10 章｜AB 测试基础", asr: "流量分流、样本量、显著性，三步缺一不可。" },
+          { title: "第 11 章｜SQL 入门", asr: "SELECT、WHERE、GROUP BY，完成一次简单的留存查询。" },
+          { title: "第 12 章｜本章小结", asr: "回顾数据思维三板斧：定义、测量、迭代。" }
+        ]
+      },
+      RS20260409009: {
+        channelId: "1003",
+        channel: "手动导入",
+        ticketId: "RS20260409009",
+        albumId: "A90009",
+        albumName: "直播运营实战课",
+        anchorLevel: "Lv.6 金牌主播",
+        tag: "完结",
+        remark:
+          "手动导入工单，已核对近 5 章 ASR 与音频一致，审核结果为完结。（示例：人审完成后只读查看）",
+        chapters: [
+          { title: "第 30 章｜流量来源拆解", asr: "自然流量、付费流量、私域导流，分别占比多少。" },
+          { title: "第 31 章｜直播间转化路径", asr: "从曝光到点击、从观看到下单，每一步漏斗怎么优化。" },
+          { title: "第 32 章｜排品与节奏", asr: "引流款、利润款、形象款如何搭配在一场直播里。" },
+          { title: "第 33 章｜违规与风控", asr: "常见话术红线与应急处理，避免直播间被中断。" },
+          { title: "第 34 章｜课程结语", asr: "恭喜你完成本模块，下一模块我们讲团队分工。" }
+        ]
+      }
+    };
+
+    const QUEUE_KEY = "humanAuditQueueManualImport";
+
+    function getImportedTicketDetail(ticketId) {
+      try {
+        const raw = sessionStorage.getItem("manualImportTicketDetails");
+        if (!raw) return null;
+        const map = JSON.parse(raw);
+        const d = map[ticketId];
+        if (!d) return null;
+        return { ...d, ticketId };
+      } catch {
+        return null;
+      }
+    }
+
+    /** 列表分页演示行会在工单号后追加 P01–P12，与 detailByTicket 中的基础 ID 对齐；Excel 导入的工单仅存于 sessionStorage */
+    function getDetailForTicket(ticketId) {
+      const direct = detailByTicket[ticketId];
+      if (direct) {
+        return { ...direct, ticketId };
+      }
+      const imported = getImportedTicketDetail(ticketId);
+      if (imported) {
+        return imported;
+      }
+      const baseId = ticketId.replace(/P\d{2}$/, "");
+      if (baseId !== ticketId) {
+        const base = detailByTicket[baseId];
+        if (base) {
+          return { ...base, ticketId };
+        }
+        const importedBase = getImportedTicketDetail(baseId);
+        if (importedBase) {
+          return { ...importedBase, ticketId };
+        }
+      }
+      return null;
+    }
+
+    function getQueryTicketId() {
+      const p = new URLSearchParams(window.location.search);
+      return (p.get("ticketId") || "").trim();
+    }
+
+    function isReadonlyMode() {
+      const p = new URLSearchParams(window.location.search);
+      return p.get("readonly") === "1";
+    }
+
+    const AUDIT_PATCH_KEY = "auditResultPatches";
+    const ADMIN_SESSION_KEY = "auditListAdmin";
+
+    function isAuditListAdmin() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getAuditPatch(ticketId) {
+      try {
+        const m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+        return m[ticketId] || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getTicketContext(ticketId) {
+      try {
+        const raw = sessionStorage.getItem("ticketContext_" + ticketId);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function canAdminEditFromListContext(ctx) {
+      return ctx && ctx.status === "已审核" && ctx.flow === "否";
+    }
+
+    function syncAdminSessionFromUrl() {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("admin") === "1") {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        }
+      } catch (e) {}
+    }
+
+    function shouldShowAdminEditButton(ticketId) {
+      if (!isAuditListAdmin()) return false;
+      const p = new URLSearchParams(window.location.search);
+      if (p.get("ae") === "1") return true;
+      return canAdminEditFromListContext(getTicketContext(ticketId));
+    }
+
+    function getQueue() {
+      try {
+        const raw = sessionStorage.getItem(QUEUE_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr.filter(Boolean) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setQueue(q) {
+      sessionStorage.setItem(QUEUE_KEY, JSON.stringify(q));
+    }
+
+    let currentTicketId = "";
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    function renderDetail(ticketId) {
+      const d = getDetailForTicket(ticketId);
+      if (!d) {
+        document.getElementById("mainContent").innerHTML =
+          '<div class="section"><p>未找到该工单的人审原型数据，请从列表进入。</p><p><a href="audit-list-prototype.html">返回审核列表</a></p></div>';
+        document.querySelector(".footer-bar").style.display = "none";
+        return;
+      }
+
+      document.getElementById("mainContent").innerHTML = AUDIT_MAIN_INNER_HTML;
+      document.querySelector(".footer-bar").style.display = "flex";
+      const cm = document.getElementById("confirmModal");
+      if (cm) cm.classList.remove("show");
+
+      currentTicketId = ticketId;
+      document.querySelectorAll('input[name="tag"]').forEach(r => {
+        r.checked = false;
+      });
+      document.getElementById("remark").value = "";
+
+      document.getElementById("basicGrid").innerHTML = `
+        <div class="field-row"><label>渠道ID</label><div class="value">${d.channelId}</div></div>
+        <div class="field-row"><label>渠道</label><div class="value">${d.channel}</div></div>
+        <div class="field-row"><label>审核方式</label><div class="value">人审</div></div>
+        <div class="field-row"><label>工单ID</label><div class="value">${d.ticketId}</div></div>
+        <div class="field-row"><label>专辑ID</label><div class="value">${d.albumId}</div></div>
+        <div class="field-row" style="grid-column:1/-1"><label>专辑名称</label><div class="value">${d.albumName}</div></div>
+        <div class="field-row"><label>主播等级</label><div class="value">${d.anchorLevel}</div></div>
+      `;
+
+      document.getElementById("chaptersBox").innerHTML = d.chapters
+        .map(c => {
+          const title = escapeHtml(c.title);
+          const asr = escapeHtml(c.asr);
+          return `
+        <div class="chapter">
+          <div class="chapter-hd">${title}</div>
+          <div class="audio-row">
+            <span style="font-size:12px;color:#667085;white-space:nowrap">原始音频</span>
+            <audio controls controlsList="nodownload" preload="metadata" src="${SAMPLE_AUDIO}">
+              您的浏览器不支持音频播放
+            </audio>
+          </div>
+          <div style="font-size:12px;color:#667085;margin:12px 0 6px">ASR 文稿</div>
+          <div class="asr">${asr}</div>
+        </div>
+      `;
+        })
+        .join("");
+
+      const btnSubmit = document.getElementById("btnSubmit");
+      btnSubmit.style.display = "";
+
+      const btnBack = document.getElementById("btnBack");
+      if (isReadonlyMode()) {
+        btnSubmit.style.display = "none";
+        btnBack.textContent = "返回审核列表";
+        const patch = getAuditPatch(ticketId);
+        let tagVal = d.tag || "完结";
+        let remarkVal = d.remark || "";
+        if (patch) {
+          if (patch.result) tagVal = patch.result;
+          if (patch.remark !== undefined) remarkVal = patch.remark;
+        }
+        document.querySelectorAll('input[name="tag"]').forEach(r => {
+          r.checked = r.value === tagVal;
+          r.disabled = true;
+        });
+        const ta = document.getElementById("remark");
+        ta.value = remarkVal;
+        ta.disabled = true;
+        document.getElementById("auditInfoSection").classList.add("audit-readonly");
+      } else {
+        btnBack.textContent = "返回";
+        document.getElementById("auditInfoSection").classList.remove("audit-readonly");
+        document.querySelectorAll('input[name="tag"]').forEach(r => {
+          r.disabled = false;
+        });
+        document.getElementById("remark").disabled = false;
+      }
+
+      const showAdmin = isReadonlyMode() && shouldShowAdminEditButton(ticketId);
+      const btnAe = document.getElementById("btnAdminEdit");
+      if (btnAe) btnAe.style.display = showAdmin ? "inline-flex" : "none";
+    }
+
+    function getSelectedTag() {
+      const checked = document.querySelector('input[name="tag"]:checked');
+      return checked ? checked.value : "";
+    }
+
+    const confirmModal = document.getElementById("confirmModal");
+    const modalTagSummary = document.getElementById("modalTagSummary");
+
+    function openConfirmModal(tag) {
+      modalTagSummary.textContent = `审核结果：${tag}`;
+      confirmModal.classList.add("show");
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.remove("show");
+    }
+
+    document.getElementById("modalCancel").addEventListener("click", closeConfirmModal);
+    document.getElementById("modalConfirm").addEventListener("click", () => {
+      closeConfirmModal();
+      submitAuditAndNext();
+    });
+
+    document.getElementById("modalDialogBox").addEventListener("click", e => {
+      e.stopPropagation();
+    });
+
+    confirmModal.addEventListener("click", e => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && confirmModal.classList.contains("show")) {
+        closeConfirmModal();
+      }
+    });
+
+    document.getElementById("btnBack").addEventListener("click", () => {
+      window.location.href = isAuditListAdmin()
+        ? "audit-list-prototype.html?admin=1"
+        : "audit-list-prototype.html";
+    });
+
+    document.getElementById("btnAdminEdit").addEventListener("click", () => {
+      const tid = getQueryTicketId();
+      const raw = sessionStorage.getItem("ticketContext_" + tid);
+      if (!raw) {
+        alert("缺少列表上下文，请从审核列表点击「查看」进入后再试。");
+        return;
+      }
+      sessionStorage.setItem("adminEditTicketRow", raw);
+      window.location.href =
+        "admin-audit-result.html?ticketId=" +
+        encodeURIComponent(tid) +
+        "&admin=1&_=" +
+        Date.now();
+    });
+
+    function submitAuditAndNext() {
+      const queue = getQueue();
+      const nextQueue = queue.filter(id => id !== currentTicketId);
+      setQueue(nextQueue);
+
+      if (nextQueue.length === 0) {
+        showToast("已全部处理完成");
+        const btnSubmit = document.getElementById("btnSubmit");
+        const btnBack = document.getElementById("btnBack");
+        btnSubmit.style.display = "none";
+        btnBack.textContent = "返回审核列表";
+        document.querySelector(".footer-bar").style.display = "flex";
+        document.getElementById("mainContent").innerHTML = `
+          <div class="section empty-end-done">
+            <div class="done-badge">✓</div>
+            <p class="empty-title">当前已处理完毕队列中的全部人审工单</p>
+            <p class="empty-sub">您已完成本次人审任务，可返回列表继续处理其他工作。</p>
+            <a class="empty-link" href="audit-list-prototype.html">返回审核列表</a>
+          </div>`;
+        window.scrollTo(0, 0);
+        return;
+      }
+
+      const nextId = nextQueue[0];
+      showToast("提交成功，加载下一工单…");
+      setTimeout(() => {
+        window.location.replace(
+          `human-audit-manual-import.html?ticketId=${encodeURIComponent(nextId)}&_=${Date.now()}`
+        );
+      }, 400);
+    }
+
+    document.addEventListener(
+      "click",
+      e => {
+        const btn = e.target && e.target.closest && e.target.closest("#btnSubmit");
+        if (!btn) return;
+        e.preventDefault();
+        const tag = getSelectedTag();
+        if (!tag) {
+          alert("请选择审核结果（完结 / 未完结）");
+          return;
+        }
+        openConfirmModal(tag);
+      },
+      false
+    );
+
+    (function init() {
+      syncAdminSessionFromUrl();
+      const ticketId = getQueryTicketId();
+      if (!ticketId) {
+        document.getElementById("mainContent").innerHTML =
+          '<div class="section"><p>缺少工单参数。</p><a href="audit-list-prototype.html">返回审核列表</a></div>';
+        document.querySelector(".footer-bar").style.display = "none";
+        return;
+      }
+      let queue = getQueue();
+      if (!isReadonlyMode() && (!queue.length || !queue.includes(ticketId))) {
+        setQueue([ticketId]);
+      }
+
+      const dPre = getDetailForTicket(ticketId);
+      const ap = new URLSearchParams(window.location.search);
+      if (
+        isReadonlyMode() &&
+        dPre &&
+        ap.get("ae") === "1" &&
+        ap.get("admin") === "1" &&
+        !getTicketContext(ticketId)
+      ) {
+        try {
+          sessionStorage.setItem(
+            "ticketContext_" + ticketId,
+            JSON.stringify({
+              channelId: dPre.channelId,
+              channel: dPre.channel,
+              method: "人审",
+              ticketId: dPre.ticketId,
+              albumId: dPre.albumId,
+              albumName: dPre.albumName,
+              status: "已审核",
+              result: dPre.tag === "未完结" ? "未完结" : "完结",
+              time: "",
+              flow: "否",
+              linked: { upstream: "", downstream: "" }
+            })
+          );
+        } catch (e) {}
+      }
+
+      renderDetail(ticketId);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>工单详情 · 主播主动申请-机审</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #e7eaf0;
+      --text: #1f2d3d;
+      --sub: #667085;
+      --blue: #2f54eb;
+      --green: #12b76a;
+      --orange: #f79009;
+      --gray: #98a2b3;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 88px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .crumb {
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .crumb a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .crumb a:hover {
+      text-decoration: underline;
+    }
+
+    .crumb strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .wrap {
+      width: 96%;
+      max-width: 1040px;
+      margin: 20px auto;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f3f7;
+    }
+
+    .grid-basic {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 14px 28px;
+    }
+
+    .field-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-row label {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .field-row .value {
+      font-size: 14px;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      line-height: 22px;
+      border-radius: 11px;
+      padding: 0 9px;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    .b-gray { background: var(--gray); }
+    .b-green { background: var(--green); }
+    .b-orange { background: var(--orange); }
+
+    .reason-box {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #344054;
+      white-space: pre-wrap;
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid #eaecf0;
+    }
+
+    .audit-block {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .audit-block .field-row label {
+      font-weight: 600;
+      color: #344054;
+      font-size: 13px;
+    }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: 0 -4px 12px rgba(16, 24, 40, 0.06);
+      z-index: 50;
+    }
+
+    .footer-bar .footer-spacer {
+      flex: 1;
+      min-width: 8px;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #d0d5dd;
+      background: #fff;
+      color: #344054;
+    }
+
+    .btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .empty-tip {
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .empty-tip a {
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    @media (max-width: 720px) {
+      .grid-basic {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="crumb">
+      <a href="audit-list-prototype.html">审核列表</a>
+      <span> / </span>
+      <strong>工单详情</strong>
+    </div>
+  </div>
+
+  <div class="wrap" id="mainWrap"></div>
+
+  <div class="footer-bar">
+    <button type="button" class="btn btn-primary" id="btnAdminEdit" style="display:none">修改审核结果</button>
+    <div class="footer-spacer"></div>
+    <button type="button" class="btn" id="btnBack">返回审核列表</button>
+  </div>
+
+  <script>
+    const detailAnchorApplyMachine = {
+      JS20260409001: {
+        channel: "主播主动申请",
+        channelId: "1001",
+        auditMethod: "机审",
+        ticketId: "JS20260409001",
+        albumId: "A90001",
+        albumName: "财经热点早知道",
+        lastSoundId: "SND100096",
+        lastSoundTitle: "第 100 章｜本单元小结",
+        authorFinished: "是",
+        auditResult: "完结",
+        auditReason:
+          "机审识别到专辑已打「完结」标签，且近 30 天无新增声音，符合完结口径。",
+        auditTime: "2026-04-09 09:31:00"
+      },
+      JS20260409002: {
+        channel: "主播主动申请",
+        channelId: "1001",
+        auditMethod: "机审",
+        ticketId: "JS20260409002",
+        albumId: "A90002",
+        albumName: "创业案例拆解",
+        lastSoundId: "SND100048",
+        lastSoundTitle: "第 48 章｜复盘与展望",
+        authorFinished: "否",
+        auditResult: "完结",
+        auditReason:
+          "机审依据专辑元数据与更新节奏判断可进入后续人审环节（原型示例文案）。",
+        auditTime: "2026-04-09 09:48:00"
+      }
+    };
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function getQueryTicketId() {
+      const p = new URLSearchParams(window.location.search);
+      return (p.get("ticketId") || "").trim();
+    }
+
+    const AUDIT_PATCH_KEY = "auditResultPatches";
+    const ADMIN_SESSION_KEY = "auditListAdmin";
+
+    function isAuditListAdmin() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getAuditPatch(ticketId) {
+      try {
+        const m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+        return m[ticketId] || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function getTicketContext(ticketId) {
+      try {
+        const raw = sessionStorage.getItem("ticketContext_" + ticketId);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function canAdminEditFromListContext(ctx) {
+      return ctx && ctx.status === "已审核" && ctx.flow === "否";
+    }
+
+    function syncAdminSessionFromUrl() {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("admin") === "1") {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        }
+      } catch (e) {}
+    }
+
+    function shouldShowAdminEditButton(ticketId) {
+      if (!isAuditListAdmin()) return false;
+      const p = new URLSearchParams(window.location.search);
+      if (p.get("ae") === "1") return true;
+      return canAdminEditFromListContext(getTicketContext(ticketId));
+    }
+
+    function renderDetail(d, ticketId) {
+      const patch = getAuditPatch(ticketId);
+      let auditResult = d.auditResult;
+      let auditReason = d.auditReason;
+      let auditTime = d.auditTime;
+      let adminNote = "";
+      if (patch) {
+        if (patch.result) auditResult = patch.result;
+        if (patch.time) auditTime = patch.time;
+        if (patch.remark && String(patch.remark).trim()) {
+          adminNote = String(patch.remark).trim();
+        }
+      }
+      const authorYes = d.authorFinished === "是";
+      const resultClass = auditResult === "完结" ? "b-green" : "b-orange";
+
+      document.getElementById("mainWrap").innerHTML = `
+        <div class="section">
+          <h2 class="section-title">基础信息</h2>
+          <div class="grid-basic">
+            <div class="field-row"><label>渠道ID</label><div class="value">${escapeHtml(d.channelId)}</div></div>
+            <div class="field-row"><label>渠道</label><div class="value">${escapeHtml(d.channel)}</div></div>
+            <div class="field-row"><label>审核方式</label><div class="value">${escapeHtml(d.auditMethod)}</div></div>
+            <div class="field-row"><label>工单ID</label><div class="value">${escapeHtml(d.ticketId)}</div></div>
+            <div class="field-row"><label>专辑ID</label><div class="value">${escapeHtml(d.albumId)}</div></div>
+            <div class="field-row" style="grid-column:1/-1"><label>专辑名称</label><div class="value">${escapeHtml(d.albumName)}</div></div>
+            <div class="field-row"><label>最后1章声音ID</label><div class="value">${escapeHtml(d.lastSoundId)}</div></div>
+            <div class="field-row"><label>最后1章声音标题</label><div class="value">${escapeHtml(d.lastSoundTitle)}</div></div>
+            <div class="field-row"><label>作者是否完结</label><div class="value"><span class="badge ${authorYes ? "b-green" : "b-gray"}">${escapeHtml(d.authorFinished)}</span></div></div>
+          </div>
+        </div>
+        <div class="section">
+          <h2 class="section-title">审核信息</h2>
+          <div class="audit-block">
+            <div class="field-row">
+              <label>审核结果</label>
+              <div class="value"><span class="badge ${resultClass}">${escapeHtml(auditResult)}</span></div>
+            </div>
+            <div class="field-row">
+              <label>原因</label>
+              <div class="reason-box">${escapeHtml(auditReason)}</div>
+            </div>
+            ${adminNote
+              ? `<div class="field-row">
+              <label>管理员备注</label>
+              <div class="reason-box">${escapeHtml(adminNote)}</div>
+            </div>`
+              : ""}
+            <div class="field-row">
+              <label>审核时间</label>
+              <div class="value">${escapeHtml(auditTime)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const showAdmin = shouldShowAdminEditButton(ticketId);
+      const btnAdmin = document.getElementById("btnAdminEdit");
+      if (btnAdmin) btnAdmin.style.display = showAdmin ? "inline-block" : "none";
+    }
+
+    function renderUnsupported(ticketId) {
+      document.getElementById("mainWrap").innerHTML = `
+        <div class="section empty-tip">
+          <p>当前原型仅支持查看 <strong>主播主动申请 · 机审</strong> 类工单详情。</p>
+          <p>工单 <code style="background:#f2f4f7;padding:2px 6px;border-radius:4px">${escapeHtml(ticketId)}</code> 的详情模板尚未接入。</p>
+          <p style="margin-top:16px"><a href="audit-list-prototype.html">返回审核列表</a></p>
+        </div>
+      `;
+    }
+
+    (function init() {
+      syncAdminSessionFromUrl();
+      const ticketId = getQueryTicketId();
+      document.getElementById("btnBack").addEventListener("click", () => {
+        window.location.href = isAuditListAdmin()
+          ? "audit-list-prototype.html?admin=1"
+          : "audit-list-prototype.html";
+      });
+
+      const btnAdminEdit = document.getElementById("btnAdminEdit");
+      if (btnAdminEdit) {
+        btnAdminEdit.addEventListener("click", () => {
+          const tid = getQueryTicketId();
+          const raw = sessionStorage.getItem("ticketContext_" + tid);
+          if (!raw) {
+            alert("缺少列表上下文，请从审核列表点击「查看」进入后再试。");
+            return;
+          }
+          sessionStorage.setItem("adminEditTicketRow", raw);
+          window.location.href =
+            "admin-audit-result.html?ticketId=" +
+            encodeURIComponent(tid) +
+            "&admin=1&_=" +
+            Date.now();
+        });
+      }
+
+      if (!ticketId) {
+        document.getElementById("mainWrap").innerHTML =
+          '<div class="section empty-tip">缺少工单参数。<a href="audit-list-prototype.html">返回审核列表</a></div>';
+        const ba = document.getElementById("btnAdminEdit");
+        if (ba) ba.style.display = "none";
+        return;
+      }
+
+      const d = detailAnchorApplyMachine[ticketId];
+      if (!d) {
+        renderUnsupported(ticketId);
+        const ba = document.getElementById("btnAdminEdit");
+        if (ba) ba.style.display = "none";
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      if (
+        params.get("ae") === "1" &&
+        params.get("admin") === "1" &&
+        !getTicketContext(ticketId)
+      ) {
+        try {
+          sessionStorage.setItem(
+            "ticketContext_" + ticketId,
+            JSON.stringify({
+              channelId: d.channelId,
+              channel: d.channel,
+              method: d.auditMethod,
+              ticketId: d.ticketId,
+              albumId: d.albumId,
+              albumName: d.albumName,
+              status: "已审核",
+              result: d.auditResult,
+              time: d.auditTime,
+              flow: "否",
+              linked: { upstream: "", downstream: "" }
+            })
+          );
+        } catch (e) {}
+      }
+
+      renderDetail(d, ticketId);
+    })();
+  </script>
+</body>
+</html>
