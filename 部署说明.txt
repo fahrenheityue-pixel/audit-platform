@@ -1,0 +1,46 @@
+专辑完结审核原型 · 部署到 GitHub Pages（账号：fahrenheityue-pixel）
+================================================================
+
+【本地已就绪】
+路径：Documents/audit-platform-github/
+已包含全部 HTML、入口 index.html、README.md，并已执行 git init 与首次 commit。
+
+【你需要完成的步骤】
+
+1）在 GitHub 网站新建仓库
+   · 打开：https://github.com/new
+   · Owner：fahrenheityue-pixel
+   · 仓库名：自定，例如 audit-platform（下面命令里请改成你的实际仓库名）
+   · 选 Public
+   · 不要勾选自动添加 README，创建空仓库
+
+2）在本机终端执行（将 audit-platform 换成你的仓库名）
+
+   cd ~/Documents/audit-platform-github
+
+   git remote add origin https://github.com/fahrenheityue-pixel/audit-platform.git
+
+   git push -u origin main
+
+   （若提示登录，按 GitHub 当前要求使用 HTTPS Token 或改用 SSH 远程地址）
+
+3）开启 GitHub Pages
+   · 打开该仓库 → Settings → Pages
+   · Source：Deploy from a branch
+   · Branch：main，目录：/ (root) → Save
+
+4）等待约 1～3 分钟后访问
+
+   https://fahrenheityue-pixel.github.io/audit-platform/
+
+   （仓库名若不是 audit-platform，请把地址里的 audit-platform 改成你的仓库名）
+
+   审核列表直达：
+   https://fahrenheityue-pixel.github.io/audit-platform/audit-list-prototype.html
+
+   管理员演示：在列表 URL 后加 ?admin=1
+
+【说明】
+· 若希望站点域名为 https://fahrenheityue-pixel.github.io/（无子路径），需单独建名为
+  fahrenheityue-pixel.github.io 的仓库，并把本目录内容推送到该仓库，此处不展开。
+· 原型使用外链 CDN（如 Excel 组件），访客需能访问公网。
