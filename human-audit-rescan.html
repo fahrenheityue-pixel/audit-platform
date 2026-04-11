@@ -425,6 +425,13 @@
       line-height: 1.6;
     }
 
+    .audit-time-value {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1f2d3d;
+      word-break: break-all;
+    }
+
     #auditInfoSection.audit-readonly input[disabled],
     #auditInfoSection.audit-readonly textarea[disabled] {
       cursor: default;
@@ -513,6 +520,10 @@
         <label for="remark">审核备注（选填）</label>
         <textarea id="remark" placeholder="可补充说明，非必填"></textarea>
       </div>
+      <div class="audit-row audit-time-row" id="auditTimeRow" style="display:none">
+        <label>审核时间</label>
+        <div class="audit-time-value" id="auditTimeValue"></div>
+      </div>
     </div>`;
 
     const detailByTicket = {
@@ -557,6 +568,7 @@
         albumName: "即兴演讲训练营",
         anchorLevel: "Lv.6 金牌主播",
         tag: "未完结",
+        auditTime: "2026-04-03 16:45:00",
         remark:
           "机审回扫命中敏感词片段已复核，近 5 章内容合规，维持审核结果为未完结，建议后续机审策略微调。（示例：人审完成后只读查看）",
         chapters: [
@@ -743,6 +755,18 @@
         ta.value = remarkVal;
         ta.disabled = true;
         document.getElementById("auditInfoSection").classList.add("audit-readonly");
+        const auditTimeRow = document.getElementById("auditTimeRow");
+        const auditTimeValueEl = document.getElementById("auditTimeValue");
+        if (auditTimeRow && auditTimeValueEl) {
+          let auditTimeStr = d.auditTime ? String(d.auditTime).trim() : "";
+          if (patch && patch.time) auditTimeStr = String(patch.time).trim();
+          if (!auditTimeStr) {
+            const ctx = getTicketContext(ticketId);
+            if (ctx && ctx.time) auditTimeStr = String(ctx.time).trim();
+          }
+          auditTimeValueEl.textContent = auditTimeStr || "—";
+          auditTimeRow.style.display = "";
+        }
       } else {
         btnBack.textContent = "返回";
         document.getElementById("auditInfoSection").classList.remove("audit-readonly");
@@ -750,6 +774,8 @@
           r.disabled = false;
         });
         document.getElementById("remark").disabled = false;
+        const auditTimeRow = document.getElementById("auditTimeRow");
+        if (auditTimeRow) auditTimeRow.style.display = "none";
       }
 
       const showAdmin = isReadonlyMode() && shouldShowAdminEditButton(ticketId);

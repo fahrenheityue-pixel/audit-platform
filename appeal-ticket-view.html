@@ -166,6 +166,19 @@
       color: #344054;
     }
 
+    /* 与机审工单详情 ticket-detail 审核信息区一致 */
+    .audit-block {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .audit-block .field-row label {
+      font-weight: 600;
+      color: #344054;
+      font-size: 13px;
+    }
+
     .result-pill {
       display: inline-block;
       align-self: flex-start;
@@ -288,7 +301,8 @@
           { name: "第8章更新截图.png", href: "#" },
           { name: "后台章节列表.pdf", href: "#" }
         ],
-        auditTag: "未完结"
+        auditTag: "未完结",
+        auditTime: "2026-04-06 10:18:00"
       },
       SS20260409041: {
         channelId: "1002",
@@ -301,7 +315,8 @@
         appealType: "还需上传物料（音频）",
         appealReason: "",
         appealFiles: [],
-        auditTag: "未完结"
+        auditTag: "未完结",
+        auditTime: "2026-04-05 15:42:00"
       }
     };
 
@@ -413,9 +428,18 @@
       const resultPillClass =
         tag === "完结" ? "result-pill result-pill--done" : "result-pill result-pill--open";
 
+      let auditTime = d.auditTime;
+      if (patch && patch.time) {
+        auditTime = patch.time;
+      }
+      const auditTimeStr =
+        auditTime != null && String(auditTime).trim() !== ""
+          ? escapeHtml(String(auditTime).trim())
+          : "—";
+
       const adminNoteBlock =
         patch && patch.remark && String(patch.remark).trim()
-          ? `<div class="audit-row" style="margin-top:12px">
+          ? `<div class="field-row">
             <label>管理员备注</label>
             <div class="appeal-reason">${escapeHtml(String(patch.remark).trim())}</div>
           </div>`
@@ -449,11 +473,17 @@
         </div>
         <div class="section">
           <h2 class="section-title">审核信息</h2>
-          <div class="audit-row">
-            <label>审核结果</label>
-            <span class="${resultPillClass}">${escapeHtml(tag)}</span>
+          <div class="audit-block">
+            <div class="field-row">
+              <label>审核结果</label>
+              <div class="value"><span class="${resultPillClass}">${escapeHtml(tag)}</span></div>
+            </div>
+            ${adminNoteBlock}
+            <div class="field-row">
+              <label>审核时间</label>
+              <div class="value">${auditTimeStr}</div>
+            </div>
           </div>
-          ${adminNoteBlock}
         </div>`;
 
       const showAdmin = shouldShowAdminEditButton(ticketId);
