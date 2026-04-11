@@ -237,6 +237,7 @@
         channelId: "1001",
         auditMethod: "机审",
         ticketId: "JS20260409001",
+        createTime: "2026-04-08 16:00:00",
         albumId: "A90001",
         albumName: "财经热点早知道",
         lastSoundId: "SND100096",
@@ -252,6 +253,7 @@
         channelId: "1001",
         auditMethod: "机审",
         ticketId: "JS20260409002",
+        createTime: "2026-04-08 17:20:00",
         albumId: "A90002",
         albumName: "创业案例拆解",
         lastSoundId: "SND100048",
@@ -349,6 +351,7 @@
             <div class="field-row"><label>渠道</label><div class="value">${escapeHtml(d.channel)}</div></div>
             <div class="field-row"><label>审核方式</label><div class="value">${escapeHtml(d.auditMethod)}</div></div>
             <div class="field-row"><label>工单ID</label><div class="value">${escapeHtml(d.ticketId)}</div></div>
+            <div class="field-row"><label>创建时间</label><div class="value">${escapeHtml(d.createTime || "—")}</div></div>
             <div class="field-row"><label>专辑ID</label><div class="value">${escapeHtml(d.albumId)}</div></div>
             <div class="field-row" style="grid-column:1/-1"><label>专辑名称</label><div class="value">${escapeHtml(d.albumName)}</div></div>
             <div class="field-row"><label>最后1章声音ID</label><div class="value">${escapeHtml(d.lastSoundId)}</div></div>
@@ -455,6 +458,7 @@
               ticketId: d.ticketId,
               albumId: d.albumId,
               albumName: d.albumName,
+              createTime: d.createTime || "",
               status: "已审核",
               result: d.auditResult,
               time: d.auditTime,

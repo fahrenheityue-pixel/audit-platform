@@ -659,6 +659,7 @@
               <th>工单ID</th>
               <th>专辑ID</th>
               <th>专辑名称</th>
+              <th>创建时间</th>
               <th>审核状态</th>
               <th>审核结果</th>
               <th>审核时间</th>
@@ -689,41 +690,41 @@
   <script>
     let listData = [
       // 1) 主播主动申请 + 机审：不存在上下游
-      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409001", albumId: "A90001", albumName: "财经热点早知道", status: "已审核", result: "完结", time: "2026-04-09 09:31:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409001", albumId: "A90001", albumName: "财经热点早知道", createTime: "2026-04-08 16:00:00", status: "已审核", result: "完结", time: "2026-04-09 09:31:00", flow: "否", linked: { upstream: "", downstream: "" } },
       // 2) 主播主动申请 + 机审：仅下游唯一工单
-      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409002", albumId: "A90002", albumName: "创业案例拆解", status: "已审核", result: "完结", time: "2026-04-09 09:48:00", flow: "是", linked: { upstream: "", downstream: "RS20260409021" } },
+      { channelId: "1001", channel: "主播主动申请", method: "机审", ticketId: "JS20260409002", albumId: "A90002", albumName: "创业案例拆解", createTime: "2026-04-08 17:20:00", status: "已审核", result: "完结", time: "2026-04-09 09:48:00", flow: "是", linked: { upstream: "", downstream: "RS20260409021" } },
       // 3) 主播主动申请 + 人审：仅上游唯一工单
-      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409003", albumId: "A90003", albumName: "亲子英语启蒙", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260408018", downstream: "" } },
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409003", albumId: "A90003", albumName: "亲子英语启蒙", createTime: "2026-04-07 10:15:00", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260408018", downstream: "" } },
       // 3b) 主播主动申请 + 人审：仅上游（另一条待审核，用于人审「下一个」演示）
-      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409011", albumId: "A90011", albumName: "睡前故事精选集", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260409001", downstream: "" } },
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409011", albumId: "A90011", albumName: "睡前故事精选集", createTime: "2026-04-07 11:30:00", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "JS20260409001", downstream: "" } },
       // 3c) 主播主动申请 + 人审：已审核（查看 → 人审页只读，审核结果与审核备注已填且置灰）
-      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409099", albumId: "A90099", albumName: "自然拼读训练营", status: "已审核", result: "完结", time: "2026-04-03 15:00:00", flow: "否", linked: { upstream: "JS20260409002", downstream: "" } },
+      { channelId: "1001", channel: "主播主动申请", method: "人审", ticketId: "RS20260409099", albumId: "A90099", albumName: "自然拼读训练营", createTime: "2026-04-01 09:00:00", status: "已审核", result: "完结", time: "2026-04-03 15:00:00", flow: "否", linked: { upstream: "JS20260409002", downstream: "" } },
       // 4) 机审回扫 + 机审：不存在上下游
-      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409004", albumId: "A90004", albumName: "历史故事会", status: "已审核", result: "未完结", time: "2026-04-08 10:02:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409004", albumId: "A90004", albumName: "历史故事会", createTime: "2026-04-07 08:30:00", status: "已审核", result: "未完结", time: "2026-04-08 10:02:00", flow: "否", linked: { upstream: "", downstream: "" } },
       // 5) 机审回扫 + 机审：仅下游唯一工单
-      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409005", albumId: "A90005", albumName: "心理学入门", status: "已审核", result: "完结", time: "2026-04-08 11:12:00", flow: "是", linked: { upstream: "", downstream: "RS20260409031" } },
+      { channelId: "1002", channel: "机审回扫", method: "机审", ticketId: "JS20260409005", albumId: "A90005", albumName: "心理学入门", createTime: "2026-04-07 09:45:00", status: "已审核", result: "完结", time: "2026-04-08 11:12:00", flow: "是", linked: { upstream: "", downstream: "RS20260409031" } },
       // 6) 机审回扫 + 人审：仅上游，待审核（结果未定 → 继续流转暂不确定）
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409006", albumId: "A90006", albumName: "职场表达力训练", status: "待审核", result: "", time: "", flow: "暂不确定", linked: { upstream: "JS20260409005", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409006", albumId: "A90006", albumName: "职场表达力训练", createTime: "2026-04-05 14:00:00", status: "待审核", result: "", time: "", flow: "暂不确定", linked: { upstream: "JS20260409005", downstream: "" } },
       // 6a) 机审回扫 + 人审：第二条待审核（与 RS20260409006 组成人审「下一个」演示）
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409067", albumId: "A90067", albumName: "声音塑造入门课", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409067", albumId: "A90067", albumName: "声音塑造入门课", createTime: "2026-04-06 09:20:00", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
       // 6d) 机审回扫 + 人审：已审核（查看 → 机审回扫人审页只读，审核结果与审核备注已填且置灰）
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409068", albumId: "A90068", albumName: "即兴演讲训练营", status: "已审核", result: "未完结", time: "2026-04-02 10:00:00", flow: "否", linked: { upstream: "JS20260409004", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409068", albumId: "A90068", albumName: "即兴演讲训练营", createTime: "2026-04-01 11:00:00", status: "已审核", result: "未完结", time: "2026-04-02 10:00:00", flow: "否", linked: { upstream: "JS20260409004", downstream: "" } },
       // 6b) 机审回扫 + 人审：人审完结后进入 72 小时申诉窗口期（尚无下游）
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409061", albumId: "A90061", albumName: "城市漫步手记", status: "已审核", result: "完结", time: "2026-04-07 18:00:00", flow: "72小时申诉窗口期", linked: { upstream: "JS20260409012", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409061", albumId: "A90061", albumName: "城市漫步手记", createTime: "2026-04-06 17:00:00", status: "已审核", result: "完结", time: "2026-04-07 18:00:00", flow: "72小时申诉窗口期", linked: { upstream: "JS20260409012", downstream: "" } },
       // 6c) 机审回扫 + 人审：72 小时届满未申诉
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409062", albumId: "A90062", albumName: "周末厨房实验", status: "已审核", result: "完结", time: "2026-04-06 12:00:00", flow: "否", linked: { upstream: "JS20260409013", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409062", albumId: "A90062", albumName: "周末厨房实验", createTime: "2026-04-05 10:00:00", status: "已审核", result: "完结", time: "2026-04-06 12:00:00", flow: "否", linked: { upstream: "JS20260409013", downstream: "" } },
       // 7) 机审回扫 + 人审：主播已申诉，下游关联申诉工单
-      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409007", albumId: "A90007", albumName: "高效阅读训练营", status: "已审核", result: "完结", time: "2026-04-07 16:45:00", flow: "是", linked: { upstream: "JS20260409012", downstream: "SS20260409041" } },
+      { channelId: "1002", channel: "机审回扫", method: "人审", ticketId: "RS20260409007", albumId: "A90007", albumName: "高效阅读训练营", createTime: "2026-04-06 14:30:00", status: "已审核", result: "完结", time: "2026-04-07 16:45:00", flow: "是", linked: { upstream: "JS20260409012", downstream: "SS20260409041" } },
       // 8) 机审回扫 + 申诉：仅上游唯一工单（查看 → 申诉工单页）
-      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409008", albumId: "A90008", albumName: "电影深度解析", status: "已审核", result: "未完结", time: "2026-04-06 13:08:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409008", albumId: "A90008", albumName: "电影深度解析", createTime: "2026-04-05 12:00:00", status: "已审核", result: "未完结", time: "2026-04-06 13:08:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
       // 8b) 机审回扫 + 申诉：下游申诉工单示例（申诉理由/凭证为空）
-      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409041", albumId: "A90041", albumName: "古典乐赏析课", status: "已审核", result: "未完结", time: "2026-04-05 11:20:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
+      { channelId: "1002", channel: "机审回扫", method: "申诉", ticketId: "SS20260409041", albumId: "A90041", albumName: "古典乐赏析课", createTime: "2026-04-04 10:00:00", status: "已审核", result: "未完结", time: "2026-04-05 11:20:00", flow: "否", linked: { upstream: "RS20260409007", downstream: "" } },
       // 9) 手动导入 + 人审：无上下游（查看 → 手动导入人审页只读，审核结果与审核备注已填且置灰）
-      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409009", albumId: "A90009", albumName: "直播运营实战课", status: "已审核", result: "完结", time: "2026-04-05 09:20:00", flow: "否", linked: { upstream: "", downstream: "" } },
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409009", albumId: "A90009", albumName: "直播运营实战课", createTime: "2026-04-04 15:00:00", status: "已审核", result: "完结", time: "2026-04-05 09:20:00", flow: "否", linked: { upstream: "", downstream: "" } },
       // 10) 手动导入 + 人审：待审核，无上下游（进入人审 → human-audit-manual-import.html）
-      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409010", albumId: "A90010", albumName: "主播成长方法论", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409010", albumId: "A90010", albumName: "主播成长方法论", createTime: "2026-04-08 10:00:00", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } },
       // 10a) 手动导入 + 人审：第二条待审核（与 RS20260409010 组成人审「下一个」演示）
-      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409069", albumId: "A90069", albumName: "数据思维入门", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } }
+      { channelId: "1003", channel: "手动导入", method: "人审", ticketId: "RS20260409069", albumId: "A90069", albumName: "数据思维入门", createTime: "2026-04-08 11:15:00", status: "待审核", result: "", time: "", flow: "否", linked: { upstream: "", downstream: "" } }
     ];
 
     (function appendDemoRowsForPaging() {
@@ -743,6 +744,7 @@
           ticketId: t.ticketId + suffix,
           albumId: t.albumId + suffix,
           albumName: t.albumName + "（分页演示）",
+          createTime: t.createTime,
           status: t.status,
           result: t.result,
           time: t.time,
@@ -868,6 +870,12 @@
       });
     }
 
+    function formatListCreateTimeNow() {
+      const n = new Date();
+      const p = x => String(x).padStart(2, "0");
+      return `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    }
+
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -901,7 +909,7 @@
 
     function renderTableRows(data) {
       if (!data.length) {
-        tableBody.innerHTML = '<tr><td colspan="12" class="empty">暂无符合条件的数据</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="13" class="empty">暂无符合条件的数据</td></tr>';
         return;
       }
 
@@ -925,6 +933,7 @@
           <td>${escapeHtml(item.ticketId)}</td>
           <td>${escapeHtml(item.albumId)}</td>
           <td title="${name}">${name}</td>
+          <td>${item.createTime ? escapeHtml(item.createTime) : "-"}</td>
           <td><span class="badge ${statusClassMap[item.status] || "b-gray"}">${escapeHtml(item.status)}</span></td>
           <td>${item.result
             ? `<span class="badge ${resultClassMap[item.result] || "b-gray"}">${escapeHtml(item.result)}</span>`
@@ -1264,7 +1273,8 @@
           albumId,
           albumName,
           anchorLevel: "Lv.4 认证主播",
-          chapters: defaultChaptersForAlbum(albumName)
+          chapters: defaultChaptersForAlbum(albumName),
+          createTime: formatListCreateTimeNow()
         };
         sessionStorage.setItem(IMPORT_DETAIL_KEY, JSON.stringify(map));
       }
@@ -1414,6 +1424,7 @@
                         ticketId,
                         albumId,
                         albumName,
+                        createTime: formatListCreateTimeNow(),
                         status: "待审核",
                         result: "",
                         time: "",

@@ -277,6 +277,7 @@
         channelId: "1002",
         channel: "机审回扫",
         ticketId: "SS20260409008",
+        createTime: "2026-04-05 12:00:00",
         albumId: "A90008",
         albumName: "电影深度解析",
         anchorLevel: "Lv.4 认证主播",
@@ -293,6 +294,7 @@
         channelId: "1002",
         channel: "机审回扫",
         ticketId: "SS20260409041",
+        createTime: "2026-04-04 10:00:00",
         albumId: "A90041",
         albumName: "古典乐赏析课",
         anchorLevel: "Lv.5 优质主播",
@@ -427,6 +429,7 @@
             <div class="field-row"><label>渠道</label><div class="value">${escapeHtml(d.channel)}</div></div>
             <div class="field-row"><label>审核方式</label><div class="value">申诉</div></div>
             <div class="field-row"><label>工单ID</label><div class="value">${escapeHtml(d.ticketId)}</div></div>
+            <div class="field-row"><label>创建时间</label><div class="value">${escapeHtml(d.createTime || "—")}</div></div>
             <div class="field-row"><label>专辑ID</label><div class="value">${escapeHtml(d.albumId)}</div></div>
             <div class="field-row" style="grid-column:1/-1"><label>专辑名称</label><div class="value">${escapeHtml(d.albumName)}</div></div>
             <div class="field-row"><label>主播等级</label><div class="value">${escapeHtml(d.anchorLevel)}</div></div>
@@ -508,6 +511,7 @@
               ticketId: dPre.ticketId,
               albumId: dPre.albumId,
               albumName: dPre.albumName,
+              createTime: dPre.createTime || "",
               status: "已审核",
               result: dPre.auditTag === "完结" ? "完结" : "未完结",
               time: "",
