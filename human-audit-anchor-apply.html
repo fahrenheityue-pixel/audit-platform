@@ -457,6 +457,15 @@
       border-color: #e4e7ec;
     }
 
+    /** 管理员编辑：仅可改审核结果，备注置灰不可编辑 */
+    #auditInfoSection.admin-remark-readonly textarea#remark:disabled {
+      cursor: default;
+      opacity: 1;
+      color: #344054;
+      background: #f2f4f7;
+      border-color: #e4e7ec;
+    }
+
     #auditInfoSection.audit-readonly .radio-group label {
       cursor: default;
       color: #475467;
@@ -916,10 +925,11 @@
         const adminEdit = isHumanAuditAdminEditMode() && shouldShowAdminEditButton(ticketId);
         if (adminEdit) {
           document.getElementById("auditInfoSection").classList.remove("audit-readonly");
+          document.getElementById("auditInfoSection").classList.add("admin-remark-readonly");
           document.querySelectorAll('input[name="tag"]').forEach(r => {
             r.disabled = false;
           });
-          ta.disabled = false;
+          ta.disabled = true;
           const auditTimeRow = document.getElementById("auditTimeRow");
           const auditTimeValueEl = document.getElementById("auditTimeValue");
           if (auditTimeRow && auditTimeValueEl) {
@@ -933,6 +943,7 @@
             auditTimeRow.style.display = "";
           }
         } else {
+          document.getElementById("auditInfoSection").classList.remove("admin-remark-readonly");
           document.querySelectorAll('input[name="tag"]').forEach(r => {
             r.disabled = true;
           });
@@ -954,6 +965,7 @@
       } else {
         btnBack.textContent = "返回";
         document.getElementById("auditInfoSection").classList.remove("audit-readonly");
+        document.getElementById("auditInfoSection").classList.remove("admin-remark-readonly");
         document.querySelectorAll('input[name="tag"]').forEach(r => {
           r.disabled = false;
         });
