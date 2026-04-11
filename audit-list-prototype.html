@@ -578,6 +578,10 @@
           <input id="albumId" placeholder="请输入专辑ID（精确）" />
         </div>
         <div class="field">
+          <label for="ticketIdFilter">工单ID</label>
+          <input id="ticketIdFilter" placeholder="请输入工单ID（精确）" />
+        </div>
+        <div class="field">
           <label for="auditStatus">审核状态</label>
           <select id="auditStatus">
             <option value="">全部</option>
@@ -599,6 +603,14 @@
             <input id="timeStart" type="date" />
             <span class="date-sep">至</span>
             <input id="timeEnd" type="date" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="createTimeStart">创建时间</label>
+          <div class="date-range">
+            <input id="createTimeStart" type="date" />
+            <span class="date-sep">至</span>
+            <input id="createTimeEnd" type="date" />
           </div>
         </div>
         <div class="field">
@@ -837,10 +849,13 @@
     const channelSelect = document.getElementById("channel");
     const methodSelect = document.getElementById("method");
     const albumIdInput = document.getElementById("albumId");
+    const ticketIdFilterInput = document.getElementById("ticketIdFilter");
     const auditStatusSelect = document.getElementById("auditStatus");
     const auditResultSelect = document.getElementById("auditResult");
     const timeStartInput = document.getElementById("timeStart");
     const timeEndInput = document.getElementById("timeEnd");
+    const createTimeStartInput = document.getElementById("createTimeStart");
+    const createTimeEndInput = document.getElementById("createTimeEnd");
     const flowContinueSelect = document.getElementById("flowContinue");
     const tableBody = document.getElementById("tableBody");
     const countText = document.getElementById("countText");
@@ -1025,17 +1040,24 @@
       const flow = flowContinueSelect.value.trim();
       const startTime = parseDate(timeStartInput.value);
       const endTime = parseDate(timeEndInput.value);
+      const ticketId = ticketIdFilterInput.value.trim();
+      const createStart = parseDate(createTimeStartInput.value);
+      const createEnd = parseDate(createTimeEndInput.value);
 
       const filtered = listData.filter(item => {
         const recordTime = parseRecordTime(item.time);
+        const recordCreate = parseRecordTime(item.createTime);
         if (channel && item.channel !== channel) return false;
         if (method && item.method !== method) return false;
         if (albumId && item.albumId !== albumId) return false;
+        if (ticketId && item.ticketId !== ticketId) return false;
         if (status && item.status !== status) return false;
         if (result && item.result !== result) return false;
         if (flow && item.flow !== flow) return false;
         if (startTime && recordTime < startTime) return false;
         if (endTime && recordTime > (endTime + 24 * 60 * 60 * 1000 - 1)) return false;
+        if (createStart && recordCreate < createStart) return false;
+        if (createEnd && recordCreate > (createEnd + 24 * 60 * 60 * 1000 - 1)) return false;
         return true;
       });
 
@@ -1065,10 +1087,13 @@
       channelSelect.value = "";
       methodSelect.value = "";
       albumIdInput.value = "";
+      ticketIdFilterInput.value = "";
       auditStatusSelect.value = "";
       auditResultSelect.value = "";
       timeStartInput.value = "";
       timeEndInput.value = "";
+      createTimeStartInput.value = "";
+      createTimeEndInput.value = "";
       flowContinueSelect.value = "";
       updateMethodOptionsByChannel();
       setFilteredData(sortByDefaultRule(listData));
@@ -1198,7 +1223,14 @@
         importModal.classList.remove("show");
       }
 
-      document.getElementById("openImportModalBtn").addEventListener("click", openImportModal);
+      const openImportBtn = document.getElementById("openImportModalBtn");
+      if (openImportBtn) {
+        if (!isAuditListAdmin()) {
+          openImportBtn.style.display = "none";
+        } else {
+          openImportBtn.addEventListener("click", openImportModal);
+        }
+      }
       document.getElementById("importModalClose").addEventListener("click", closeImportModal);
       importModal.addEventListener("click", e => {
         if (e.target === importModal) closeImportModal();
