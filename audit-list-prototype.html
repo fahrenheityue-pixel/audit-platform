@@ -863,6 +863,7 @@
       return new Date(value.replace(" ", "T")).getTime();
     }
 
+    /** 待审核置顶；待审核 / 已审核各自按创建时间倒序（新的在前） */
     function sortByDefaultRule(data) {
       return [...data].sort((a, b) => {
         const aPending = a.status === "待审核";
@@ -870,10 +871,7 @@
         if (aPending !== bPending) {
           return aPending ? -1 : 1;
         }
-        if (aPending && bPending) {
-          return 0;
-        }
-        return parseRecordTime(b.time) - parseRecordTime(a.time);
+        return parseRecordTime(b.createTime) - parseRecordTime(a.createTime);
       });
     }
 
