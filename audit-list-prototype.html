@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
   <title>审核列表页原型</title>
   <style>
     :root {
@@ -137,8 +139,13 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1380px;
+      min-width: 1560px;
       background: #fff;
+    }
+
+    thead th.col-create-time,
+    tbody td.col-create-time {
+      min-width: 158px;
     }
 
     thead th {
@@ -659,7 +666,7 @@
               <th>工单ID</th>
               <th>专辑ID</th>
               <th>专辑名称</th>
-              <th>创建时间</th>
+              <th class="col-create-time">创建时间</th>
               <th>审核状态</th>
               <th>审核结果</th>
               <th>审核时间</th>
@@ -915,6 +922,10 @@
 
       const html = data.map(item => {
         const name = escapeHtml(item.albumName);
+        const createTimeStr =
+          item.createTime != null && String(item.createTime).trim() !== ""
+            ? escapeHtml(String(item.createTime).trim())
+            : "-";
         const humanReviewPending = item.method === "人审" && item.status === "待审核";
         const manualBtn = humanReviewPending
           ? `<button type="button" class="op-btn secondary js-manual-audit" data-ticket-id="${escapeHtml(item.ticketId)}">进入人审</button>`
@@ -933,7 +944,7 @@
           <td>${escapeHtml(item.ticketId)}</td>
           <td>${escapeHtml(item.albumId)}</td>
           <td title="${name}">${name}</td>
-          <td>${item.createTime ? escapeHtml(item.createTime) : "-"}</td>
+          <td class="col-create-time">${createTimeStr}</td>
           <td><span class="badge ${statusClassMap[item.status] || "b-gray"}">${escapeHtml(item.status)}</span></td>
           <td>${item.result
             ? `<span class="badge ${resultClassMap[item.result] || "b-gray"}">${escapeHtml(item.result)}</span>`
