@@ -776,6 +776,33 @@
     const ADMIN_SESSION_KEY = "auditListAdmin";
     const AUDIT_PATCH_KEY = "auditResultPatches";
 
+    /** 内置示例：人审且无需继续流转的工单默认带一条「管理员修改记录」（仅当尚无记录时写入）。 */
+    const BUILTIN_ADMIN_CHANGE_LOG_DEMOS = {
+      RS20260409099: {
+        result: "完结",
+        remark: "",
+        time: "2026-04-10 10:00:00",
+        adminChangeLog: [
+          { time: "2026-04-10 10:00:00", fromResult: "未完结", toResult: "完结" }
+        ]
+      }
+    };
+
+    function mergeBuiltInAdminChangeLogDemo(ticketId) {
+      const seed = BUILTIN_ADMIN_CHANGE_LOG_DEMOS[ticketId];
+      if (!seed) return;
+      let m = {};
+      try {
+        m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+      } catch (e) {
+        m = {};
+      }
+      const prev = m[ticketId] || {};
+      if (Array.isArray(prev.adminChangeLog) && prev.adminChangeLog.length) return;
+      m[ticketId] = { ...prev, ...seed };
+      sessionStorage.setItem(AUDIT_PATCH_KEY, JSON.stringify(m));
+    }
+
     (function initAuditListAdminFromUrl() {
       try {
         if (new URLSearchParams(window.location.search).get("admin") === "1") {
@@ -783,6 +810,8 @@
         }
       } catch (e) {}
     })();
+
+    Object.keys(BUILTIN_ADMIN_CHANGE_LOG_DEMOS).forEach(mergeBuiltInAdminChangeLogDemo);
 
     function applyAuditResultPatchesToList() {
       let patches = {};
@@ -817,7 +846,8 @@
       return (
         isAuditListAdmin() &&
         row.status === "已审核" &&
-        row.flow === "否"
+        row.flow === "否" &&
+        row.method === "人审"
       );
     }
 
@@ -825,7 +855,14 @@
     function adminViewQuerySuffix(row) {
       if (!isAuditListAdmin()) return "";
       let s = "&admin=1";
-      if (row && row.status === "已审核" && row.flow === "否") s += "&ae=1";
+      if (
+        row &&
+        row.status === "已审核" &&
+        row.flow === "否" &&
+        row.method === "人审"
+      ) {
+        s += "&ae=1";
+      }
       return s;
     }
 
@@ -1131,9 +1168,28 @@
       const row = listData.find(i => i.ticketId === ticketId);
       if (!row || !canAdminEditAuditRow(row)) return;
       try {
-        sessionStorage.setItem("adminEditTicketRow", JSON.stringify(row));
+        sessionStorage.setItem("ticketContext_" + ticketId, JSON.stringify(row));
       } catch (e) {}
-      window.location.href = `admin-audit-result.html?ticketId=${encodeURIComponent(ticketId)}&admin=1&_=${Date.now()}`;
+      const suffix = adminViewQuerySuffix(row);
+      if (row.method === "人审" && row.status === "已审核") {
+        if (row.channel === "主播主动申请") {
+          window.location.href = `human-audit-anchor-apply.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&adminEdit=1&_=${Date.now()}${suffix}`;
+          return;
+        }
+        if (row.channel === "机审回扫") {
+          window.location.href = `human-audit-rescan.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&adminEdit=1&_=${Date.now()}${suffix}`;
+          return;
+        }
+        if (row.channel === "手动导入") {
+          window.location.href = `human-audit-manual-import.html?ticketId=${encodeURIComponent(ticketId)}&readonly=1&adminEdit=1&_=${Date.now()}${suffix}`;
+          return;
+        }
+      }
+      if (row.method === "申诉") {
+        window.location.href = `appeal-ticket-view.html?ticketId=${encodeURIComponent(ticketId)}&adminEdit=1&_=${Date.now()}${suffix}`;
+        return;
+      }
+      window.location.href = `ticket-detail.html?ticketId=${encodeURIComponent(ticketId)}&adminEdit=1&_=${Date.now()}${suffix}`;
     }
 
     function onManualAudit(ticketId) {

@@ -199,6 +199,119 @@
       color: #fff;
     }
 
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .radio-group label {
+      font-weight: 400;
+      cursor: pointer;
+      font-size: 14px;
+      color: #344054;
+    }
+
+    .audit-block textarea {
+      width: 100%;
+      min-height: 88px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0d5dd;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .audit-block textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47, 84, 235, 0.12);
+    }
+
+    .audit-block .field-row .hint {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 400;
+    }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn-default {
+      background: #fff;
+      border: 1px solid #d0d5dd;
+      color: #344054;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background: var(--card);
+      border-radius: 12px;
+      max-width: 420px;
+      width: 100%;
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 48px rgba(16, 24, 40, 0.18);
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      border-bottom: 1px solid #f1f3f7;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      font-size: 14px;
+      color: #344054;
+      line-height: 1.6;
+    }
+
+    .modal-summary {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #eaecf0;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    .modal-summary--admin-result {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      background: #f2f4f7;
+      border-color: #d0d5dd;
+    }
+
+    .modal-foot {
+      padding: 12px 20px 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
     .footer-bar {
       position: fixed;
       left: 0;
@@ -210,22 +323,20 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 12px;
       flex-wrap: wrap;
       box-shadow: 0 -4px 12px rgba(16, 24, 40, 0.06);
       z-index: 50;
     }
 
-    .footer-bar .footer-spacer {
-      flex: 1;
-      min-width: 8px;
-    }
-
     .btn {
-      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
       padding: 0 18px;
       border-radius: 8px;
       font-size: 14px;
+      line-height: 1.25;
       cursor: pointer;
       border: 1px solid #d0d5dd;
       background: #fff;
@@ -265,9 +376,38 @@
   <div class="wrap" id="mainContent"></div>
 
   <div class="footer-bar">
-    <button type="button" class="btn btn-primary" id="btnAdminEdit" style="display:none">修改审核结果</button>
-    <div class="footer-spacer"></div>
-    <button type="button" class="btn" id="btnBack">返回审核列表</button>
+    <div class="footer-actions">
+      <button type="button" class="btn btn-primary" id="btnAdminEdit" style="display:none">修改审核结果</button>
+      <button type="button" class="btn btn-default" id="btnAdminCancel" style="display:none">取消</button>
+      <button type="button" class="btn btn-primary" id="btnAdminSave" style="display:none">提交修改</button>
+      <button type="button" class="btn" id="btnBack">返回审核列表</button>
+    </div>
+  </div>
+
+  <div id="adminUnchangedModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="appealUnchangedTitle">
+    <div class="modal-dialog" id="adminUnchangedModalBox">
+      <div class="modal-head" id="appealUnchangedTitle">提示</div>
+      <div class="modal-body">
+        <p style="margin:0">结果未更改，无需提交</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-primary" id="appealUnchangedOk">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminSaveModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="adminSaveModalTitle">
+    <div class="modal-dialog" id="adminSaveModalBox">
+      <div class="modal-head" id="adminSaveModalTitle">确认提交</div>
+      <div class="modal-body">
+        <p id="adminSaveModalIntro" style="margin:0"></p>
+        <div id="adminSaveModalResult" class="modal-summary modal-summary--admin-result" style="display:none"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn" id="adminSaveModalCancel">返回修改</button>
+        <button type="button" class="btn btn-primary" id="adminSaveModalConfirm">确认保存</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -326,7 +466,34 @@
     }
 
     const AUDIT_PATCH_KEY = "auditResultPatches";
+    const ADMIN_EDIT_BASELINE_KEY = "auditAdminEditBaseline";
     const ADMIN_SESSION_KEY = "auditListAdmin";
+
+    function readAdminBaselineMap() {
+      try {
+        return JSON.parse(sessionStorage.getItem(ADMIN_EDIT_BASELINE_KEY) || "{}");
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function getAdminResultBaseline(ticketId) {
+      const m = readAdminBaselineMap();
+      const b = m[ticketId];
+      return b && b.result != null ? String(b.result) : null;
+    }
+
+    function setAdminResultBaseline(ticketId, result) {
+      const m = readAdminBaselineMap();
+      m[ticketId] = { result: String(result || "") };
+      sessionStorage.setItem(ADMIN_EDIT_BASELINE_KEY, JSON.stringify(m));
+    }
+
+    function clearAdminResultBaseline(ticketId) {
+      const m = readAdminBaselineMap();
+      delete m[ticketId];
+      sessionStorage.setItem(ADMIN_EDIT_BASELINE_KEY, JSON.stringify(m));
+    }
 
     function isAuditListAdmin() {
       try {
@@ -355,7 +522,12 @@
     }
 
     function canAdminEditFromListContext(ctx) {
-      return ctx && ctx.status === "已审核" && ctx.flow === "否";
+      return (
+        ctx &&
+        ctx.status === "已审核" &&
+        ctx.flow === "否" &&
+        ctx.method === "人审"
+      );
     }
 
     function syncAdminSessionFromUrl() {
@@ -369,9 +541,88 @@
 
     function shouldShowAdminEditButton(ticketId) {
       if (!isAuditListAdmin()) return false;
-      const p = new URLSearchParams(window.location.search);
-      if (p.get("ae") === "1") return true;
       return canAdminEditFromListContext(getTicketContext(ticketId));
+    }
+
+    function isAppealAdminEditMode() {
+      return new URLSearchParams(window.location.search).get("adminEdit") === "1";
+    }
+
+    function formatNowAuditTime() {
+      const n = new Date();
+      const p = x => String(x).padStart(2, "0");
+      return `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+    }
+
+    function persistAuditPatch(ticketId, result, remark, adminChange) {
+      let m = {};
+      try {
+        m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
+      } catch (e) {
+        m = {};
+      }
+      const prev = m[ticketId] || {};
+      const log = Array.isArray(prev.adminChangeLog) ? prev.adminChangeLog.slice() : [];
+      if (adminChange && adminChange.fromResult !== adminChange.toResult) {
+        log.push({
+          time: formatNowAuditTime(),
+          fromResult: adminChange.fromResult,
+          toResult: adminChange.toResult
+        });
+      }
+      m[ticketId] = {
+        ...prev,
+        result,
+        remark,
+        time: formatNowAuditTime(),
+        adminChangeLog: log
+      };
+      sessionStorage.setItem(AUDIT_PATCH_KEY, JSON.stringify(m));
+    }
+
+    function renderAdminChangeLogBlock(patch) {
+      const log = patch && Array.isArray(patch.adminChangeLog) ? patch.adminChangeLog : [];
+      if (!log.length) return "";
+      const lines = log.map(
+        e =>
+          `${escapeHtml(e.time)} 将「${escapeHtml(e.fromResult)}」改为「${escapeHtml(e.toResult)}」`
+      );
+      return `<div class="field-row">
+        <label>管理员修改记录</label>
+        <div class="appeal-reason">${lines.join("<br/>")}</div>
+      </div>`;
+    }
+
+    function setAppealAdminEditParam(on) {
+      const u = new URL(window.location.href);
+      if (on) u.searchParams.set("adminEdit", "1");
+      else u.searchParams.delete("adminEdit");
+      history.replaceState(null, "", u.toString());
+    }
+
+    function updateAppealFooter(showAdmin) {
+      const edit = showAdmin && isAppealAdminEditMode();
+      const ids = ["btnAdminEdit", "btnAdminCancel", "btnAdminSave", "btnBack"];
+      const els = ids.map(id => document.getElementById(id));
+      const [btnEdit, btnCancel, btnSave, btnBack] = els;
+      if (!showAdmin) {
+        if (btnEdit) btnEdit.style.display = "none";
+        if (btnCancel) btnCancel.style.display = "none";
+        if (btnSave) btnSave.style.display = "none";
+        if (btnBack) btnBack.style.display = "inline-block";
+        return;
+      }
+      if (edit) {
+        if (btnEdit) btnEdit.style.display = "none";
+        if (btnCancel) btnCancel.style.display = "inline-block";
+        if (btnSave) btnSave.style.display = "inline-block";
+        if (btnBack) btnBack.style.display = "inline-block";
+      } else {
+        if (btnEdit) btnEdit.style.display = "inline-block";
+        if (btnCancel) btnCancel.style.display = "none";
+        if (btnSave) btnSave.style.display = "none";
+        if (btnBack) btnBack.style.display = "inline-block";
+      }
     }
 
     function getDetailForTicket(ticketId) {
@@ -437,13 +688,40 @@
           ? escapeHtml(String(auditTime).trim())
           : "—";
 
-      const adminNoteBlock =
-        patch && patch.remark && String(patch.remark).trim()
-          ? `<div class="field-row">
-            <label>管理员备注</label>
-            <div class="appeal-reason">${escapeHtml(String(patch.remark).trim())}</div>
-          </div>`
-          : "";
+      const showAdmin = shouldShowAdminEditButton(ticketId);
+      const adminEdit = showAdmin && isAppealAdminEditMode();
+
+      let auditInfoInner;
+      if (adminEdit) {
+        auditInfoInner = `
+          <div class="audit-block">
+            <div class="field-row">
+              <label>审核结果 <span class="hint">（必选）</span></label>
+              <div class="radio-group">
+                <label><input type="radio" name="appealAdminResult" value="完结" ${tag === "完结" ? "checked" : ""} /> 完结</label>
+                <label><input type="radio" name="appealAdminResult" value="未完结" ${tag === "未完结" ? "checked" : ""} /> 未完结</label>
+              </div>
+            </div>
+            <div class="field-row">
+              <label>审核时间</label>
+              <div class="value">${auditTimeStr}</div>
+            </div>
+            ${renderAdminChangeLogBlock(patch)}
+          </div>`;
+      } else {
+        auditInfoInner = `
+          <div class="audit-block">
+            <div class="field-row">
+              <label>审核结果</label>
+              <div class="value"><span class="${resultPillClass}">${escapeHtml(tag)}</span></div>
+            </div>
+            <div class="field-row">
+              <label>审核时间</label>
+              <div class="value">${auditTimeStr}</div>
+            </div>
+            ${renderAdminChangeLogBlock(patch)}
+          </div>`;
+      }
 
       main.innerHTML = `
         <div class="section">
@@ -473,22 +751,13 @@
         </div>
         <div class="section">
           <h2 class="section-title">审核信息</h2>
-          <div class="audit-block">
-            <div class="field-row">
-              <label>审核结果</label>
-              <div class="value"><span class="${resultPillClass}">${escapeHtml(tag)}</span></div>
-            </div>
-            ${adminNoteBlock}
-            <div class="field-row">
-              <label>审核时间</label>
-              <div class="value">${auditTimeStr}</div>
-            </div>
-          </div>
+          ${auditInfoInner}
         </div>`;
 
-      const showAdmin = shouldShowAdminEditButton(ticketId);
-      const btnAe = document.getElementById("btnAdminEdit");
-      if (btnAe) btnAe.style.display = showAdmin ? "inline-block" : "none";
+      if (adminEdit && showAdmin && getAdminResultBaseline(ticketId) == null) {
+        setAdminResultBaseline(ticketId, tag);
+      }
+      updateAppealFooter(showAdmin);
     }
 
     document.getElementById("btnBack").addEventListener("click", () => {
@@ -499,17 +768,99 @@
 
     document.getElementById("btnAdminEdit").addEventListener("click", () => {
       const tid = getQueryTicketId();
-      const raw = sessionStorage.getItem("ticketContext_" + tid);
-      if (!raw) {
-        alert("缺少列表上下文，请从审核列表点击「查看」进入后再试。");
+      if (!shouldShowAdminEditButton(tid)) return;
+      setAppealAdminEditParam(true);
+      renderDetail(tid);
+    });
+
+    document.getElementById("btnAdminCancel").addEventListener("click", () => {
+      const tid = getQueryTicketId();
+      clearAdminResultBaseline(tid);
+      setAppealAdminEditParam(false);
+      renderDetail(tid);
+    });
+
+    const adminSaveModal = document.getElementById("adminSaveModal");
+    function closeAppealAdminModal() {
+      window.__appealAdminSavePending = null;
+      if (adminSaveModal) adminSaveModal.classList.remove("show");
+      const resEl = document.getElementById("adminSaveModalResult");
+      if (resEl) {
+        resEl.style.display = "none";
+        resEl.textContent = "";
+      }
+    }
+    document.getElementById("adminSaveModalBox").addEventListener("click", e => e.stopPropagation());
+    adminSaveModal.addEventListener("click", e => {
+      if (e.target === adminSaveModal) closeAppealAdminModal();
+    });
+    document.getElementById("adminSaveModalCancel").addEventListener("click", closeAppealAdminModal);
+    document.getElementById("adminSaveModalConfirm").addEventListener("click", () => {
+      closeAppealAdminModal();
+      const tid = getQueryTicketId();
+      const pending = window.__appealAdminSavePending;
+      window.__appealAdminSavePending = null;
+      if (!pending || pending.ticketId !== tid) return;
+      persistAuditPatch(tid, pending.result, pending.remark, pending.adminChange);
+      clearAdminResultBaseline(tid);
+      setAppealAdminEditParam(false);
+      renderDetail(tid);
+    });
+
+    const appealUnchangedModal = document.getElementById("adminUnchangedModal");
+    function closeAppealUnchangedModal() {
+      if (appealUnchangedModal) appealUnchangedModal.classList.remove("show");
+    }
+    document.getElementById("adminUnchangedModalBox")?.addEventListener("click", e => e.stopPropagation());
+    appealUnchangedModal?.addEventListener("click", e => {
+      if (e.target === appealUnchangedModal) closeAppealUnchangedModal();
+    });
+    document.getElementById("appealUnchangedOk")?.addEventListener("click", closeAppealUnchangedModal);
+
+    document.getElementById("btnAdminSave").addEventListener("click", () => {
+      const tid = getQueryTicketId();
+      const c = document.querySelector('input[name="appealAdminResult"]:checked');
+      const result = c ? c.value : "";
+      if (!result) {
+        alert("请选择审核结果（完结 / 未完结）");
         return;
       }
-      sessionStorage.setItem("adminEditTicketRow", raw);
-      window.location.href =
-        "admin-audit-result.html?ticketId=" +
-        encodeURIComponent(tid) +
-        "&admin=1&_=" +
-        Date.now();
+      const remark = "";
+      const d = getDetailForTicket(tid);
+      const p = getAuditPatch(tid);
+      let baseline = getAdminResultBaseline(tid);
+      if (baseline == null && d) {
+        baseline = p && p.result ? p.result : d.auditTag || "未完结";
+        setAdminResultBaseline(tid, baseline);
+      }
+      if (result === baseline) {
+        if (appealUnchangedModal) appealUnchangedModal.classList.add("show");
+        return;
+      }
+      const intro = document.getElementById("adminSaveModalIntro");
+      const resEl = document.getElementById("adminSaveModalResult");
+      if (intro) {
+        intro.textContent =
+          "确定要保存以下审核结果吗？保存后将更新列表与该工单的展示信息。";
+      }
+      if (resEl) {
+        resEl.textContent = "审核结果：" + result;
+        resEl.style.display = "block";
+      }
+      window.__appealAdminSavePending = {
+        ticketId: tid,
+        result,
+        remark,
+        adminChange: { fromResult: baseline, toResult: result }
+      };
+      adminSaveModal.classList.add("show");
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && adminSaveModal.classList.contains("show")) closeAppealAdminModal();
+      if (e.key === "Escape" && appealUnchangedModal && appealUnchangedModal.classList.contains("show")) {
+        closeAppealUnchangedModal();
+      }
     });
 
     (function init() {
@@ -544,7 +895,7 @@
               createTime: dPre.createTime || "",
               status: "已审核",
               result: dPre.auditTag === "完结" ? "完结" : "未完结",
-              time: "",
+              time: dPre.auditTime || "",
               flow: "否",
               linked: { upstream: "", downstream: "" }
             })

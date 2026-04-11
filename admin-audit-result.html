@@ -262,234 +262,28 @@
     </div>
   </div>
 
-  <div class="wrap" id="mainWrap"></div>
-
-  <div class="footer-bar" id="footerBar" style="display:none">
-    <button type="button" class="btn" id="btnCancel">取消</button>
-    <button type="button" class="btn btn-primary" id="btnSubmit">提交修改</button>
-  </div>
-
-  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-dialog" id="modalDialogBox">
-      <div class="modal-head" id="modalTitle">确认提交</div>
-      <div class="modal-body">
-        <p style="margin:0">确定要保存以下审核结果吗？保存后将更新列表与该工单的展示信息。</p>
-        <div class="modal-summary" id="modalSummary"></div>
-      </div>
-      <div class="modal-foot">
-        <button type="button" class="btn" id="modalCancel">返回修改</button>
-        <button type="button" class="btn btn-primary" id="modalConfirm">确认保存</button>
-      </div>
+  <div class="wrap" id="mainWrap">
+    <div class="section empty-tip">
+      <p style="margin:0 0 12px;font-size:15px;color:#1f2d3d">
+        管理员修改审核结果已合并到<strong>各工单详情页</strong>内，不再使用本独立页面。
+      </p>
+      <p style="margin:0;line-height:1.7">
+        请在审核列表点击「<strong>查看</strong>」进入工单详情，在左下角点击「<strong>修改审核结果</strong>」进入可编辑状态；或点击行内「<strong>改审核结果</strong>」直接进入编辑状态。提交前会二次确认，与人工审核流程一致。
+      </p>
+      <p style="margin-top:20px">
+        <a href="audit-list-prototype.html?admin=1">返回审核列表（管理员）</a>
+      </p>
     </div>
   </div>
 
   <script>
-    const ADMIN_SESSION_KEY = "auditListAdmin";
-    const AUDIT_PATCH_KEY = "auditResultPatches";
-
-    function isAuditListAdmin() {
-      try {
-        return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function getAuditPatch(ticketId) {
-      try {
-        const m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
-        return m[ticketId] || null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function getTicketContext(ticketId) {
-      try {
-        const raw = sessionStorage.getItem("ticketContext_" + ticketId);
-        return raw ? JSON.parse(raw) : null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function getQueryTicketId() {
-      const p = new URLSearchParams(window.location.search);
-      return (p.get("ticketId") || "").trim();
-    }
-
-    function formatNowAuditTime() {
-      const n = new Date();
-      const p = x => String(x).padStart(2, "0");
-      return `${n.getFullYear()}-${p(n.getMonth() + 1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function resolveEditRow(ticketId) {
-      let row = null;
-      try {
-        const raw = sessionStorage.getItem("adminEditTicketRow");
-        if (raw) {
-          const r = JSON.parse(raw);
-          if (r && r.ticketId === ticketId) row = r;
-        }
-      } catch (e) {}
-      if (!row) {
-        const ctx = getTicketContext(ticketId);
-        if (ctx && ctx.ticketId === ticketId) row = ctx;
-      }
-      return row;
-    }
-
-    function canEditRow(row) {
-      return row && row.status === "已审核" && row.flow === "否";
-    }
-
-    let pendingForm = null;
-
-    function renderForm(row) {
-      const patch = getAuditPatch(row.ticketId);
-      const resultVal = patch && patch.result ? patch.result : row.result || "完结";
-      const remarkVal =
-        patch && patch.remark !== undefined ? patch.remark : row.remark || "";
-
-      document.getElementById("mainWrap").innerHTML = `
-        <div class="section">
-          <h2 class="section-title">工单信息</h2>
-          <div class="meta-line">工单ID：<code>${escapeHtml(row.ticketId)}</code></div>
-          <div class="meta-line" style="margin-top:8px">创建时间：${escapeHtml(row.createTime || "—")}</div>
-          <div class="meta-line" style="margin-top:8px">专辑：${escapeHtml(row.albumName || "")}（${escapeHtml(row.albumId || "")}）</div>
-          <div class="meta-line" style="margin-top:8px">渠道：${escapeHtml(row.channel || "")} · ${escapeHtml(row.method || "")}</div>
-          <p class="meta-line" style="margin-top:12px;color:#667085">仅当工单已审核且<strong>不再继续流转</strong>时允许管理员修改审核结果。</p>
-        </div>
-        <div class="section">
-          <h2 class="section-title">修改审核结果</h2>
-          <div class="field-row">
-            <label>审核结果 <span class="hint">（必选）</span></label>
-            <div class="radio-group">
-              <label><input type="radio" name="auditResult" value="完结" ${resultVal === "完结" ? "checked" : ""} /> 完结</label>
-              <label><input type="radio" name="auditResult" value="未完结" ${resultVal === "未完结" ? "checked" : ""} /> 未完结</label>
-            </div>
-          </div>
-          <div class="field-row">
-            <label for="auditRemark">审核备注 <span class="hint">（选填）</span></label>
-            <textarea id="auditRemark" placeholder="可补充说明"></textarea>
-          </div>
-        </div>
-      `;
-      const ta = document.getElementById("auditRemark");
-      if (ta) ta.value = remarkVal;
-      document.getElementById("footerBar").style.display = "flex";
-    }
-
-    function renderError(msg) {
-      document.getElementById("mainWrap").innerHTML = `<div class="section empty-tip">${msg}</div>`;
-      document.getElementById("footerBar").style.display = "none";
-    }
-
-    function getSelectedResult() {
-      const c = document.querySelector('input[name="auditResult"]:checked');
-      return c ? c.value : "";
-    }
-
-    const confirmModal = document.getElementById("confirmModal");
-    const modalSummary = document.getElementById("modalSummary");
-
-    function openConfirmModal(summaryText) {
-      modalSummary.textContent = summaryText;
-      confirmModal.classList.add("show");
-    }
-
-    function closeConfirmModal() {
-      confirmModal.classList.remove("show");
-    }
-
-    function persistPatch(ticketId, result, remark) {
-      let m = {};
-      try {
-        m = JSON.parse(sessionStorage.getItem(AUDIT_PATCH_KEY) || "{}");
-      } catch (e) {
-        m = {};
-      }
-      m[ticketId] = {
-        result,
-        remark,
-        time: formatNowAuditTime()
-      };
-      sessionStorage.setItem(AUDIT_PATCH_KEY, JSON.stringify(m));
-    }
-
-    document.getElementById("modalDialogBox").addEventListener("click", e => e.stopPropagation());
-    confirmModal.addEventListener("click", e => {
-      if (e.target === confirmModal) closeConfirmModal();
-    });
-    document.getElementById("modalCancel").addEventListener("click", closeConfirmModal);
-    document.getElementById("modalConfirm").addEventListener("click", () => {
-      closeConfirmModal();
-      if (!pendingForm) return;
-      const { ticketId, result, remark } = pendingForm;
-      persistPatch(ticketId, result, remark);
-      pendingForm = null;
-      window.location.href = "audit-list-prototype.html?admin=1";
-    });
-
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && confirmModal.classList.contains("show")) {
-        closeConfirmModal();
-      }
-    });
-
-    document.getElementById("btnCancel").addEventListener("click", () => {
-      window.location.href = "audit-list-prototype.html?admin=1";
-    });
-
-    document.getElementById("btnSubmit").addEventListener("click", () => {
-      const ticketId = getQueryTicketId();
-      const result = getSelectedResult();
-      if (!result) {
-        alert("请选择审核结果（完结 / 未完结）");
-        return;
-      }
-      const remark = (document.getElementById("auditRemark") && document.getElementById("auditRemark").value) || "";
-      const lines = [`审核结果：${result}`];
-      lines.push(remark.trim() ? `审核备注：${remark.trim()}` : "审核备注：（未填写）");
-      lines.push(`工单：${ticketId}`);
-      pendingForm = { ticketId, result, remark: remark.trim() };
-      openConfirmModal(lines.join("\n"));
-    });
-
     (function init() {
       try {
         const p = new URLSearchParams(window.location.search);
         if (p.get("admin") === "1") {
-          sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+          sessionStorage.setItem("auditListAdmin", "1");
         }
       } catch (e) {}
-      if (!isAuditListAdmin()) {
-        renderError(
-          '需要<strong>管理员模式</strong>。请在审核列表地址后添加 <code>?admin=1</code> 进入一次，再使用「改审核结果」。<br/><a href="audit-list-prototype.html?admin=1">打开审核列表（管理员）</a>'
-        );
-        return;
-      }
-      const ticketId = getQueryTicketId();
-      if (!ticketId) {
-        renderError('缺少工单参数。<a href="audit-list-prototype.html?admin=1">返回审核列表</a>');
-        return;
-      }
-      const row = resolveEditRow(ticketId);
-      if (!canEditRow(row)) {
-        renderError(
-          '当前工单不允许在此修改（需为已审核且不再继续流转）。请从列表点击「查看」或「改审核结果」进入。<br/><a href="audit-list-prototype.html?admin=1">返回审核列表</a>'
-        );
-        return;
-      }
-      renderForm(row);
     })();
   </script>
 </body>
