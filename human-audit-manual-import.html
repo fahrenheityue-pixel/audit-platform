@@ -639,7 +639,7 @@
       }
     }
 
-    /** 列表分页演示行会在工单号后追加 P01–P12，与 detailByTicket 中的基础 ID 对齐；Excel 导入的工单仅存于 sessionStorage */
+    /** 列表分页演示行会在工单号后追加 P01–P12，与 detailByTicket 中的基础 ID 对齐；列表批量导入的工单详情仅存于 sessionStorage */
     function getDetailForTicket(ticketId) {
       const direct = detailByTicket[ticketId];
       if (direct) {

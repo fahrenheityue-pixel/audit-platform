@@ -452,7 +452,7 @@
     }
 
     .import-modal-dialog {
-      width: min(440px, 100%);
+      width: min(520px, 100%);
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
@@ -465,6 +465,82 @@
       font-weight: 700;
       border-bottom: 1px solid var(--line);
       color: var(--text);
+    }
+
+    .import-modal-head--with-close {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .import-modal-close {
+      border: none;
+      background: transparent;
+      font-size: 22px;
+      line-height: 1;
+      color: #98a2b3;
+      cursor: pointer;
+      padding: 0 4px;
+      border-radius: 6px;
+    }
+
+    .import-modal-close:hover {
+      color: #344054;
+      background: #f2f4f7;
+    }
+
+    .import-field {
+      margin-bottom: 16px;
+    }
+
+    .import-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #344054;
+      margin-bottom: 8px;
+    }
+
+    .import-required {
+      color: #f04438;
+      margin-right: 2px;
+    }
+
+    .import-id-textarea {
+      width: 100%;
+      min-height: 168px;
+      padding: 10px 12px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    .import-id-textarea:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(47, 84, 235, 0.12);
+    }
+
+    .import-id-counter {
+      text-align: right;
+      font-size: 12px;
+      color: var(--sub);
+      margin-top: 6px;
+    }
+
+    .import-modal-foot--split {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px 18px;
+      border-top: 1px solid var(--line);
+      background: #fafbff;
     }
 
     .import-modal-body {
@@ -536,12 +612,6 @@
     .import-demo-btn:hover {
       border-color: #d0d5dd;
       color: #344054;
-    }
-
-    .import-modal-foot {
-      padding: 0 20px 16px;
-      display: flex;
-      justify-content: flex-end;
     }
 
     @media (max-width: 1200px) {
@@ -636,33 +706,36 @@
 
     <div class="modal-overlay" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
       <div class="import-modal-dialog" id="importModalDialog">
-        <div class="import-modal-head" id="importModalTitle">手动导入工单</div>
+        <div class="import-modal-head import-modal-head--with-close">
+          <span id="importModalTitle">手动导入工单</span>
+          <button type="button" class="import-modal-close" id="importModalDismiss" aria-label="关闭">×</button>
+        </div>
         <div class="import-modal-body">
           <p class="import-modal-desc">
-            此处导入的工单默认为<strong>手动导入</strong>渠道下的<strong>人审</strong>工单，导入成功后支持人工审核。请下载模板填写专辑ID和专辑名称并上传，系统根据专辑信息自动拉取声音信息并创建工单。
+            此处导入的工单默认为<strong>手动导入</strong>渠道下的<strong>人审</strong>工单。请在下方<strong>批量填写专辑ID</strong>（每行一个，必填），点击确定后将创建待审核工单。
           </p>
+          <div class="import-field">
+            <label for="importAlbumIdsInput"><span class="import-required">*</span>专辑ID</label>
+            <textarea
+              id="importAlbumIdsInput"
+              class="import-id-textarea"
+              placeholder="每行一个专辑ID，支持粘贴"
+              rows="8"
+              spellcheck="false"
+            ></textarea>
+            <div class="import-id-counter"><span id="importIdCount">0</span> / 1000</div>
+          </div>
           <div id="importProgressWrap" class="import-progress-wrap">
             <div class="import-progress-label">正在导入，请稍候…</div>
             <div class="import-progress-track">
               <div class="import-progress-bar" id="importProgressBar"></div>
             </div>
           </div>
-          <div class="import-modal-actions">
-            <button type="button" class="btn-default" id="downloadImportTemplate">下载 Excel 模板</button>
-            <div class="file-input-wrap">
-              <button type="button" class="btn-primary">上传 Excel 导入</button>
-              <input type="file" id="importExcelInput" accept=".xlsx,.xls" />
-            </div>
-          </div>
-          <div class="import-demo-row">
-            <button type="button" class="btn-default import-demo-btn" id="demoImportTwoFails">
-              演示：2 条失败（假数据，不写入列表）
-            </button>
-          </div>
           <div id="importResultBox" class="import-result-box" style="display:none"></div>
         </div>
-        <div class="import-modal-foot">
-          <button type="button" class="btn-default" id="importModalClose">关闭</button>
+        <div class="import-modal-foot import-modal-foot--split">
+          <button type="button" class="btn-default" id="importModalCancel">取消</button>
+          <button type="button" class="btn-primary" id="importModalConfirm">提交</button>
         </div>
       </div>
     </div>
@@ -705,7 +778,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     let listData = [
       // 1) 主播主动申请 + 机审：不存在上下游
@@ -807,6 +879,14 @@
       try {
         if (new URLSearchParams(window.location.search).get("admin") === "1") {
           sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+        }
+        // 本地 file:// 用 ?admin=1 常被 Chrome 拦截；请改用 #admin=1 或 http:// 访问
+        const hash = (window.location.hash || "").replace(/^#/, "");
+        if (hash) {
+          const hp = new URLSearchParams(hash);
+          if (hp.get("admin") === "1" || hash === "admin") {
+            sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+          }
         }
       } catch (e) {}
     })();
@@ -1264,11 +1344,27 @@
       const importModal = document.getElementById("importModal");
       const importModalDialog = document.getElementById("importModalDialog");
 
+      const IMPORT_DETAIL_KEY = "manualImportTicketDetails";
+
+      function updateImportIdCounter() {
+        const ta = document.getElementById("importAlbumIdsInput");
+        const el = document.getElementById("importIdCount");
+        if (!ta || !el) return;
+        const n = ta.value
+          .split(/\r?\n/)
+          .map(s => s.trim())
+          .filter(Boolean).length;
+        el.textContent = String(Math.min(n, 1000));
+      }
+
       function openImportModal() {
         importModal.classList.add("show");
         const resultBox = document.getElementById("importResultBox");
         const progressWrap = document.getElementById("importProgressWrap");
         const progressBar = document.getElementById("importProgressBar");
+        const ta = document.getElementById("importAlbumIdsInput");
+        if (ta) ta.value = "";
+        updateImportIdCounter();
         resultBox.style.display = "none";
         resultBox.innerHTML = "";
         progressWrap.classList.remove("is-visible");
@@ -1287,7 +1383,14 @@
           openImportBtn.addEventListener("click", openImportModal);
         }
       }
-      document.getElementById("importModalClose").addEventListener("click", closeImportModal);
+
+      const importAlbumIdsInput = document.getElementById("importAlbumIdsInput");
+      if (importAlbumIdsInput) {
+        importAlbumIdsInput.addEventListener("input", updateImportIdCounter);
+      }
+
+      document.getElementById("importModalCancel").addEventListener("click", closeImportModal);
+      document.getElementById("importModalDismiss").addEventListener("click", closeImportModal);
       importModal.addEventListener("click", e => {
         if (e.target === importModal) closeImportModal();
       });
@@ -1305,11 +1408,16 @@
         html += `<div class="stat stat-fail">导入失败：${failCount} 条</div>`;
         if (failCount > 0) {
           html += '<div class="import-fail-album-block">';
-          html += '<div class="import-fail-album-label">失败工单的专辑信息</div>';
+          html += '<div class="import-fail-album-label">失败明细</div>';
           failures.forEach(f => {
             html += '<div class="import-fail-album-item">';
             html += `<div><span class="import-fail-k">专辑ID</span><span class="import-fail-v">${escapeHtml(f.albumId)}</span></div>`;
-            html += `<div style="margin-top:6px"><span class="import-fail-k">专辑名称</span><span class="import-fail-v">${escapeHtml(f.albumName)}</span></div>`;
+            if (f.albumName && String(f.albumName).trim() && f.albumName !== "—") {
+              html += `<div style="margin-top:6px"><span class="import-fail-k">专辑名称</span><span class="import-fail-v">${escapeHtml(f.albumName)}</span></div>`;
+            }
+            if (f.reason) {
+              html += `<div style="margin-top:6px"><span class="import-fail-k">原因</span><span class="import-fail-v">${escapeHtml(f.reason)}</span></div>`;
+            }
             html += "</div>";
           });
           html += "</div>";
@@ -1321,19 +1429,6 @@
           setFilteredData(sortByDefaultRule(listData));
         }
       }
-
-      document.getElementById("demoImportTwoFails").addEventListener("click", () => {
-        renderImportResultBox(
-          0,
-          [
-            { albumId: "A90010", albumName: "主播成长方法论" },
-            { albumId: "A90222", albumName: "—" }
-          ],
-          { skipRefreshList: true }
-        );
-      });
-
-      const IMPORT_DETAIL_KEY = "manualImportTicketDetails";
 
       function defaultChaptersForAlbum(albumName) {
         const n = albumName || "该专辑";
@@ -1376,44 +1471,18 @@
         sessionStorage.setItem(IMPORT_DETAIL_KEY, JSON.stringify(map));
       }
 
-      function normalizeHeader(s) {
-        return String(s || "")
-          .replace(/\s/g, "")
-          .toLowerCase();
-      }
-
-      function pickColumns(firstRow) {
-        let idxId = -1;
-        let idxName = -1;
-        const keys = Array.isArray(firstRow) ? firstRow.map((c, i) => ({ c, i })) : [];
-        for (const { c, i } of keys) {
-          const h = normalizeHeader(c);
-          if (h === "专辑id") idxId = i;
-          if (h === "专辑名称" || h === "专辑名") idxName = i;
-        }
-        return { idxId, idxName };
-      }
-
-      document.getElementById("downloadImportTemplate").addEventListener("click", () => {
-        if (typeof XLSX === "undefined") {
-          alert("Excel 组件加载中，请稍后重试。");
+      function runBatchImportFromTextarea() {
+        const raw = (document.getElementById("importAlbumIdsInput") || {}).value || "";
+        const lines = raw
+          .split(/\r?\n/)
+          .map(s => s.trim())
+          .filter(Boolean);
+        if (lines.length === 0) {
+          alert("请填写专辑ID（至少一行）");
           return;
         }
-        const ws = XLSX.utils.aoa_to_sheet([
-          ["专辑ID", "专辑名称"],
-          ["A90100", "示例专辑名称"]
-        ]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-        XLSX.writeFile(wb, "手动导入工单模板.xlsx");
-      });
-
-      document.getElementById("importExcelInput").addEventListener("change", function () {
-        const file = this.files && this.files[0];
-        this.value = "";
-        if (!file) return;
-        if (typeof XLSX === "undefined") {
-          alert("Excel 组件未加载，请检查网络后刷新页面。");
+        if (lines.length > 1000) {
+          alert("单次最多导入 1000 个专辑ID");
           return;
         }
 
@@ -1422,7 +1491,7 @@
         const resultBox = document.getElementById("importResultBox");
 
         function setProgress(p) {
-          progressBar.style.width = Math.min(100, Math.max(0, p)) + "%";
+          if (progressBar) progressBar.style.width = Math.min(100, Math.max(0, p)) + "%";
         }
 
         function showProgress() {
@@ -1438,120 +1507,72 @@
         }
 
         showProgress();
-        requestAnimationFrame(() => setProgress(10));
+        requestAnimationFrame(() => setProgress(12));
 
-        const reader = new FileReader();
-        reader.onerror = function () {
-          hideProgress();
-          resultBox.style.display = "block";
-          resultBox.innerHTML =
-            '<div class="stat stat-fail">文件读取失败，请重试。</div>';
-        };
-        reader.onload = function (ev) {
-          setProgress(22);
-          setTimeout(() => {
-            let success = 0;
-            const failures = [];
-            try {
-              const data = new Uint8Array(ev.target.result);
-              setProgress(34);
-              const wb = XLSX.read(data, { type: "array" });
-              if (!wb.SheetNames || wb.SheetNames.length === 0) {
+        setTimeout(() => {
+          let success = 0;
+          const failures = [];
+          const existingIds = new Set(listData.map(r => r.albumId));
+          const seenInBatch = new Set();
+          const total = lines.length;
+
+          try {
+            lines.forEach((albumId, i) => {
+              setProgress(12 + Math.floor((78 * (i + 1)) / Math.max(total, 1)));
+              if (seenInBatch.has(albumId)) {
                 failures.push({
-                  line: "-",
-                  albumId: "—",
+                  albumId,
                   albumName: "—",
-                  reason: "Excel 中无任何工作表"
+                  reason: "本批次内重复"
                 });
-              } else {
-                const ws = wb.Sheets[wb.SheetNames[0]];
-                const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-                setProgress(42);
-                if (!matrix.length) {
-                  failures.push({
-                    line: "-",
-                    albumId: "—",
-                    albumName: "—",
-                    reason: "表格为空"
-                  });
-                } else {
-                  const header = matrix[0];
-                  const { idxId, idxName } = pickColumns(header);
-                  if (idxId < 0 || idxName < 0) {
-                    failures.push({
-                      line: "1",
-                      albumId: "—",
-                      albumName: "—",
-                      reason: "未找到表头「专辑ID」「专辑名称」，请使用模板"
-                    });
-                  } else {
-                    const existingIds = new Set(listData.map(r => r.albumId));
-                    const totalRows = matrix.length - 1;
-                    for (let r = 1; r < matrix.length; r++) {
-                      const row = matrix[r];
-                      const albumId = String(row[idxId] != null ? row[idxId] : "").trim();
-                      const albumName = String(row[idxName] != null ? row[idxName] : "").trim();
-                      const lineNo = r + 1;
-                      setProgress(42 + Math.floor((48 * (r - 1)) / Math.max(totalRows, 1)));
-                      if (!albumId && !albumName) continue;
-                      if (!albumId || !albumName) {
-                        failures.push({
-                          line: String(lineNo),
-                          albumId: albumId || "—",
-                          albumName: albumName || "—",
-                          reason: "专辑ID或专辑名称为空"
-                        });
-                        continue;
-                      }
-                      if (existingIds.has(albumId)) {
-                        failures.push({
-                          line: String(lineNo),
-                          albumId,
-                          albumName,
-                          reason: "专辑ID已存在"
-                        });
-                        continue;
-                      }
-                      const ticketId = nextManualImportTicketId();
-                      existingIds.add(albumId);
-                      listData.push({
-                        channelId: "1003",
-                        channel: "手动导入",
-                        method: "人审",
-                        ticketId,
-                        albumId,
-                        albumName,
-                        createTime: formatListCreateTimeNow(),
-                        status: "待审核",
-                        result: "",
-                        time: "",
-                        flow: "否",
-                        linked: { upstream: "", downstream: "" }
-                      });
-                      persistImportedDetail(ticketId, albumId, albumName);
-                      success++;
-                    }
-                  }
-                }
+                return;
               }
-            } catch (err) {
-              failures.push({
-                line: "-",
-                albumId: "—",
-                albumName: "—",
-                reason: "解析失败：" + (err && err.message ? err.message : "未知错误")
+              seenInBatch.add(albumId);
+              if (existingIds.has(albumId)) {
+                failures.push({
+                  albumId,
+                  albumName: "—",
+                  reason: "专辑ID已在列表中存在"
+                });
+                return;
+              }
+              const albumName = `专辑 ${albumId}`;
+              const ticketId = nextManualImportTicketId();
+              existingIds.add(albumId);
+              listData.push({
+                channelId: "1003",
+                channel: "手动导入",
+                method: "人审",
+                ticketId,
+                albumId,
+                albumName,
+                createTime: formatListCreateTimeNow(),
+                status: "待审核",
+                result: "",
+                time: "",
+                flow: "否",
+                linked: { upstream: "", downstream: "" }
               });
-            }
+              persistImportedDetail(ticketId, albumId, albumName);
+              success++;
+            });
+          } catch (err) {
+            failures.push({
+              albumId: "—",
+              albumName: "—",
+              reason: "导入失败：" + (err && err.message ? err.message : "未知错误")
+            });
+          }
 
-            setProgress(100);
-            setTimeout(() => {
-              hideProgress();
-              renderImportResultBox(success, failures);
-            }, 280);
-          }, 120);
-        };
-        reader.readAsArrayBuffer(file);
-      });
+          setProgress(100);
+          setTimeout(() => {
+            hideProgress();
+            renderImportResultBox(success, failures);
+          }, 260);
+        }, 100);
+      }
+
+      document.getElementById("importModalConfirm").addEventListener("click", runBatchImportFromTextarea);
     })();
   </script>
 </body>
